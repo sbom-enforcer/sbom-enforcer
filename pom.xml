@@ -1,0 +1,914 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- tag::license[]
+  ~
+  ~ Copyright © 2025 Christian Grobmeier, Piotr P. Karwasz
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     https://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~
+  ~ end::license[] -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>io.github.sbom-enforcer</groupId>
+  <artifactId>sbom-enforcer-parent</artifactId>
+  <version>${revision}</version>
+  <packaging>pom</packaging>
+
+  <name>SBOM Enforcer Parent</name>
+  <inceptionYear>2025</inceptionYear>
+
+  <organization>
+    <name>SBOM Enforcer Project</name>
+    <url>https://github.com/sbom-enforcer</url>
+  </organization>
+
+  <licenses>
+    <license>
+      <name>Apache-2.0</name>
+      <url>https://apache.org/licenses/LICENSE-2.0</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>pkarwasz</id>
+      <name>Piotr P. Karwasz</name>
+      <email>pkarwasz@apache.org</email>
+      <timezone>Europe/Warsaw</timezone>
+    </developer>
+    <developer>
+      <id>grobmeier</id>
+      <name>Christian Grobmeier</name>
+      <email>grobmeier@apache.org</email>
+      <timezone>Europe/Berlin</timezone>
+    </developer>
+  </developers>
+
+  <modules>
+    <module>sbom-enforcer-maven-plugin</module>
+  </modules>
+
+  <scm child.scm.connection.inherit.append.path="false" child.scm.developerConnection.inherit.append.path="false" child.scm.url.inherit.append.path="false">
+    <connection>scm:git:https://github.com/sbom-enforcer/sbom-enforcer.git</connection>
+    <developerConnection>scm:git:git@github.com:sbom-enforcer/sbom-enforcer.git</developerConnection>
+    <url>https://github.com/sbom-enforcer/sbom-enforcer</url>
+  </scm>
+
+  <issueManagement>
+    <system>Github issues</system>
+    <url>https://github.com/sbom-enforcer/sbom-enforcer/issues</url>
+  </issueManagement>
+
+  <ciManagement>
+    <system>GitHub Actions</system>
+    <url>https://github.com/sbom-enforcer/sbom-enforcer/actions</url>
+  </ciManagement>
+
+  <distributionManagement>
+    <repository>
+      <id>central</id>
+      <name>Central Repository</name>
+      <url>https://repo.maven.apache.org/maven2</url>
+    </repository>
+    <site>
+      <id>github</id>
+      <name>Github page</name>
+      <url>https://github.com/sbom-enforcer/sbom-enforcer</url>
+    </site>
+  </distributionManagement>
+
+  <properties>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <revision>0.1.0-SNAPSHOT</revision>
+
+    <!-- `bnd-maven-plugin` 7.x requires a Maven version `3.8.1` or higher -->
+    <javaBuildVersion>17</javaBuildVersion>
+    <minimalMavenBuildVersion>3.8.1</minimalMavenBuildVersion>
+
+    <!-- Enable reproducible builds -->
+    <project.build.outputTimestamp>2024-09-17T18:07:00Z</project.build.outputTimestamp>
+
+    <!-- Disable maven-site-plugin -->
+    <maven.site.skip>true</maven.site.skip>
+    <maven.site.deploy.skip>true</maven.site.deploy.skip>
+
+    <!-- Maven plugin dependencies -->
+    <error_prone.version>2.32.0</error_prone.version>
+    <findsecbugs-plugin.version>1.13.0</findsecbugs-plugin.version>
+    <palantir-java-format.version>2.50.0</palantir-java-format.version>
+
+    <!-- Maven plugin versions -->
+    <apache-jar-resource-bundle.version>1.5</apache-jar-resource-bundle.version>
+    <apache-rat-plugin.version>0.16.1</apache-rat-plugin.version>
+    <bnd-baseline-maven-plugin.version>7.0.0</bnd-baseline-maven-plugin.version>
+    <build-helper-maven-plugin.version>3.6.0</build-helper-maven-plugin.version>
+    <central-publishing-maven-plugin.version>0.5.0</central-publishing-maven-plugin.version>
+    <cyclonedx-maven-plugin.version>2.8.1</cyclonedx-maven-plugin.version>
+    <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>
+    <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
+    <log4j-changelog-maven-plugin.version>0.9.0</log4j-changelog-maven-plugin.version>
+    <maven-artifact-plugin.version>3.5.1</maven-artifact-plugin.version>
+    <maven-clean-plugin.version>3.4.0</maven-clean-plugin.version>
+    <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+    <maven-deploy-plugin.version>3.1.3</maven-deploy-plugin.version>
+    <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
+    <maven-gpg-plugin.version>3.2.6</maven-gpg-plugin.version>
+    <maven-install-plugin.version>3.1.3</maven-install-plugin.version>
+    <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
+    <maven-javadoc-plugin.version>3.10.0</maven-javadoc-plugin.version>
+    <maven-remote-resources-plugin.version>3.3.0</maven-remote-resources-plugin.version>
+    <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
+    <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
+    <maven-surefire-plugin.version>3.5.0</maven-surefire-plugin.version>
+    <spotbugs-maven-plugin.version>4.8.6.6</spotbugs-maven-plugin.version>
+    <spotless-maven-plugin.version>2.43.0</spotless-maven-plugin.version>
+
+    <!-- Dependency versions -->
+    <assertj.version>3.27.3</assertj.version>
+    <junit.version>5.11.4</junit.version>
+    <maven-plugin-annotations.version>3.14.0</maven-plugin-annotations.version>
+    <osgi-annotation-bundle.version>2.0.0</osgi-annotation-bundle.version>
+    <osgi-annotation-versioning.version>1.1.2</osgi-annotation-versioning.version>
+    <slf4j.version>2.0.16</slf4j.version>
+    <!--
+      ~ Dependencies provided by Maven.
+      ~
+      ~ Baseline: Maven 3.6.x
+      -->
+    <maven.version>3.6.3</maven.version>
+    <maven-resolver.version>1.4.2</maven-resolver.version>
+    <!-- Pinned transitive versions -->
+    <jackson.version>2.18.2</jackson.version>
+
+    <!-- Dummy version will be updated by parse-version mojo -->
+    <parsedVersion.majorVersion />
+    <parsedVersion.minorVersion />
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+
+      <dependency>
+        <groupId>org.assertj</groupId>
+        <artifactId>assertj-core</artifactId>
+        <version>${assertj.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>4.5.14</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-artifact</artifactId>
+        <version>${maven.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-core</artifactId>
+        <version>${maven.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-plugin-api</artifactId>
+        <version>${maven.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven.plugin-tools</groupId>
+        <artifactId>maven-plugin-annotations</artifactId>
+        <version>${maven-plugin-annotations.version}</version>
+        <scope>provided</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven.resolver</groupId>
+        <artifactId>maven-resolver-api</artifactId>
+        <version>${maven-resolver.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven.resolver</groupId>
+        <artifactId>maven-resolver-spi</artifactId>
+        <version>${maven-resolver.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven.resolver</groupId>
+        <artifactId>maven-resolver-impl</artifactId>
+        <version>${maven-resolver.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven.resolver</groupId>
+        <artifactId>maven-resolver-util</artifactId>
+        <version>${maven-resolver.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven.resolver</groupId>
+        <artifactId>maven-resolver-connector-basic</artifactId>
+        <version>${maven-resolver.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven.resolver</groupId>
+        <artifactId>maven-resolver-transport-http</artifactId>
+        <version>${maven-resolver.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.annotation.bundle</artifactId>
+        <version>${osgi-annotation-bundle.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.annotation.versioning</artifactId>
+        <version>${osgi-annotation-versioning.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-nop</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>${jackson.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>5.11.4</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+
+        <plugin>
+          <groupId>org.apache.rat</groupId>
+          <artifactId>apache-rat-plugin</artifactId>
+          <version>${apache-rat-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>biz.aQute.bnd</groupId>
+          <artifactId>bnd-baseline-maven-plugin</artifactId>
+          <version>${bnd-baseline-maven-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>${build-helper-maven-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.sonatype.central</groupId>
+          <artifactId>central-publishing-maven-plugin</artifactId>
+          <version>${central-publishing-maven-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.cyclonedx</groupId>
+          <artifactId>cyclonedx-maven-plugin</artifactId>
+          <version>${cyclonedx-maven-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>flatten-maven-plugin</artifactId>
+          <version>${flatten-maven-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>${jacoco-maven-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-changelog-maven-plugin</artifactId>
+          <version>${log4j-changelog-maven-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-artifact-plugin</artifactId>
+          <version>${maven-artifact-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>${maven-clean-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${maven-compiler-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>${maven-deploy-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-enforcer-plugin</artifactId>
+          <version>${maven-enforcer-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-gpg-plugin</artifactId>
+          <version>${maven-gpg-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>${maven-install-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>${maven-jar-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>${maven-javadoc-plugin.version}</version>
+          <configuration>
+            <notimestamp>true</notimestamp>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-remote-resources-plugin</artifactId>
+          <version>${maven-remote-resources-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>${maven-resources-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>${maven-source-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${maven-surefire-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>com.github.spotbugs</groupId>
+          <artifactId>spotbugs-maven-plugin</artifactId>
+          <version>${spotbugs-maven-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>com.diffplug.spotless</groupId>
+          <artifactId>spotless-maven-plugin</artifactId>
+          <version>${spotless-maven-plugin.version}</version>
+        </plugin>
+
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <phase>verify</phase>
+            <configuration>
+              <consoleOutput>true</consoleOutput>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- populate the `parsedVersion` property -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>parse-version</id>
+            <goals>
+              <goal>parse-version</goal>
+            </goals>
+            <phase>validate</phase>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.cyclonedx</groupId>
+        <artifactId>cyclonedx-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>generate-sbom</id>
+            <goals>
+              <goal>makeBom</goal>
+            </goals>
+            <phase>package</phase>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>prepare-jacoco-agent</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report-test-coverage</id>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <encoding>UTF-8</encoding>
+          <parameters>true</parameters>
+          <compilerArgs>
+            <arg>-Xlint:all</arg>
+            <arg>-XDcompilePolicy=simple</arg>
+            <arg>-Xplugin:ErrorProne</arg>
+          </compilerArgs>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>com.google.errorprone</groupId>
+              <artifactId>error_prone_core</artifactId>
+              <version>${error_prone.version}</version>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <inherited>false</inherited>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <dependencies>
+          <dependency>
+            <groupId>de.skuzzle.enforcer</groupId>
+            <artifactId>restrict-imports-enforcer-rule</artifactId>
+            <version>2.5.0</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <id>validate-build-environment</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <dependencyConvergence />
+                <requireJavaVersion>
+                  <version>${javaBuildVersion}</version>
+                </requireJavaVersion>
+                <requireMavenVersion>
+                  <version>${minimalMavenBuildVersion}</version>
+                </requireMavenVersion>
+                <RestrictImports>
+                  <reason>Expand all wildcard imports</reason>
+                  <bannedImport>**.'*'</bannedImport>
+                </RestrictImports>
+              </rules>
+            </configuration>
+          </execution>
+          <!-- Will be overridden in the `release` profile -->
+          <execution>
+            <id>enforce-no-snapshots</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireSnapshotVersion>
+                  <message>A release must use the `release` profile</message>
+                </requireSnapshotVersion>
+              </rules>
+              <fail>true</fail>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-remote-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>process-resource-bundles</id>
+            <goals>
+              <goal>process</goal>
+            </goals>
+            <configuration>
+              <resourceBundles>
+                <resourceBundle>org.apache.apache.resources:apache-jar-resource-bundle:${apache-jar-resource-bundle.version}</resourceBundle>
+              </resourceBundles>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <!-- Using module path while running tests causes `IllegalAccess` exceptions.
+               We relax that constraint for tests and use class path there. -->
+          <useModulePath>false</useModulePath>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
+        <dependencies>
+          <dependency>
+            <groupId>com.h3xstream.findsecbugs</groupId>
+            <artifactId>findsecbugs-plugin</artifactId>
+            <version>${findsecbugs-plugin.version}</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <id>spotbugs</id>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <phase>verify</phase>
+            <configuration>
+              <excludeFilterFile>${maven.multiModuleProjectDirectory}/spotbugs-exclude.xml</excludeFilterFile>
+              <fork>false</fork>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <configuration>
+          <java>
+            <licenseHeader>
+              <file>${maven.multiModuleProjectDirectory}/src/headers/java.txt</file>
+            </licenseHeader>
+            <palantirJavaFormat>
+              <version>${palantir-java-format.version}</version>
+            </palantirJavaFormat>
+          </java>
+          <pom>
+            <licenseHeader>
+              <file>${maven.multiModuleProjectDirectory}/src/headers/xml.txt</file>
+              <delimiter>&lt;project</delimiter>
+            </licenseHeader>
+            <sortPom>
+              <expandEmptyElements>false</expandEmptyElements>
+              <!-- Maven Release plugin uses this style -->
+              <spaceBeforeCloseEmptyElement>true</spaceBeforeCloseEmptyElement>
+            </sortPom>
+          </pom>
+          <formats>
+            <format>
+              <includes>
+                <include>**/*.adoc</include>
+              </includes>
+              <licenseHeader>
+                <file>${maven.multiModuleProjectDirectory}/src/headers/adoc.txt</file>
+                <delimiter>^=</delimiter>
+              </licenseHeader>
+              <endWithNewline />
+              <trimTrailingWhitespace />
+            </format>
+            <format>
+              <includes>
+                <include>src/**/*.xml</include>
+                <include>*.xml</include>
+              </includes>
+              <excludes>
+                <exclude>pom.xml</exclude>
+                <!-- The license header in changelog entry files causing Git to match irrelevant files.
+                                     This is eventually causing merge conflicts.
+                                     Hence, we avoid enforcing license headers there. -->
+                <exclude>src/changelog/**/*.xml</exclude>
+              </excludes>
+              <licenseHeader>
+                <file>${maven.multiModuleProjectDirectory}/src/headers/xml.txt</file>
+                <skipLinesMatching>^&lt;\?xml.*\?&gt;$</skipLinesMatching>
+                <delimiter>&lt;(!DOCTYPE|\w)</delimiter>
+              </licenseHeader>
+              <endWithNewline />
+              <trimTrailingWhitespace />
+            </format>
+          </formats>
+        </configuration>
+      </plugin>
+
+    </plugins>
+  </build>
+
+  <profiles>
+
+    <profile>
+
+      <id>flatten-jar-pom</id>
+
+      <activation>
+        <file>
+          <exists>src/main/java</exists>
+        </file>
+      </activation>
+
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>flatten-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>flatten-all</id>
+                <goals>
+                  <goal>flatten</goal>
+                </goals>
+                <phase>process-resources</phase>
+                <configuration>
+                  <flattenMode>ossrh</flattenMode>
+                  <omitExclusions>true</omitExclusions>
+                </configuration>
+              </execution>
+              <execution>
+                <id>clean-flattened-pom</id>
+                <goals>
+                  <goal>clean</goal>
+                </goals>
+                <phase>clean</phase>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+
+      <id>changelog-release</id>
+
+      <build>
+
+        <defaultGoal>log4j-changelog:release@release-changelog</defaultGoal>
+
+        <plugins>
+
+          <plugin>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-changelog-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>release-changelog</id>
+                <configuration>
+                  <releaseVersion>${project.version}</releaseVersion>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+
+      </build>
+
+    </profile>
+
+    <profile>
+
+      <id>changelog-generate</id>
+
+      <build>
+
+        <defaultGoal>log4j-changelog:export@generate-changelog</defaultGoal>
+
+        <plugins>
+
+          <plugin>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-changelog-maven-plugin</artifactId>
+            <inherited>false</inherited>
+            <executions>
+              <execution>
+                <id>generate-changelog</id>
+                <configuration>
+                  <outputDirectory>${project.basedir}/src/antora/modules/ROOT</outputDirectory>
+                  <indexTemplates>
+                    <template>
+                      <source>index.adoc.ftl</source>
+                      <target>pages/release-notes.adoc</target>
+                    </template>
+                  </indexTemplates>
+                  <changelogTemplates>
+                    <template>
+                      <source>.release-notes.adoc.ftl</source>
+                      <target>partials/release-notes/%v.adoc</target>
+                    </template>
+                  </changelogTemplates>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+
+      </build>
+
+    </profile>
+
+    <profile>
+
+      <id>release</id>
+
+      <build>
+        <plugins>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>enforce-no-snapshots</id>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <configuration>
+                  <rules combine.self="override">
+                    <requireReleaseDeps>
+                      <message>A release cannot have SNAPSHOT dependencies</message>
+                      <onlyWhenRelease>true</onlyWhenRelease>
+                    </requireReleaseDeps>
+                    <requireReleaseVersion>
+                      <message>A release cannot be a SNAPSHOT version</message>
+                    </requireReleaseVersion>
+                  </rules>
+                  <fail>true</fail>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>${maven-gpg-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+                <phase>verify</phase>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar-no-fork</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+                <configuration>
+                  <notimestamp>true</notimestamp>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.sonatype.central</groupId>
+            <artifactId>central-publishing-maven-plugin</artifactId>
+            <extensions>true</extensions>
+            <configuration>
+              <publishingServerId>central</publishingServerId>
+            </configuration>
+          </plugin>
+
+        </plugins>
+      </build>
+    </profile>
+
+    <!-- Dummy profile to trigger updates for these dependencies -->
+    <profile>
+
+      <id>dummy-dependabot</id>
+
+      <dependencies>
+        <dependency>
+          <groupId>com.google.errorprone</groupId>
+          <artifactId>error_prone_core</artifactId>
+          <version>${error_prone.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>com.h3xstream.findsecbugs</groupId>
+          <artifactId>findsecbugs-plugin</artifactId>
+          <version>${findsecbugs-plugin.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>com.palantir.javaformat</groupId>
+          <artifactId>palantir-java-format</artifactId>
+          <version>${palantir-java-format.version}</version>
+        </dependency>
+      </dependencies>
+    </profile>
+
+  </profiles>
+</project>

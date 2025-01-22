@@ -1,0 +1,11 @@
+# Build directory
+target/
+# Eclipse files
+.classpath
+.project
+.settings/
+# IDEA files
+/.idea/
+*.iml
+# Maven files
+.flattened-pom.xml
