@@ -25,6 +25,9 @@ import java.util.function.Supplier;
 import org.eclipse.aether.artifact.Artifact;
 import org.jspecify.annotations.Nullable;
 
+/**
+ * Default {@link BomBuilderRequest} implementation.
+ */
 public class DefaultBomBuilderRequest implements BomBuilderRequest {
 
     private final Artifact artifact;

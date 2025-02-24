@@ -90,30 +90,32 @@ public interface Component {
      * Enumeration of supported checksum algorithms.
      */
     enum ChecksumAlgorithm {
-        ADLER32(null, "ADLER32"),
-        MD2(null, "MD2"),
-        MD4(null, "MD4"),
-        MD5("MD5", "MD5"),
-        MD6(null, "MD6"),
-        SHA1("SHA-1", "SHA1"),
-        SHA224(null, "SHA224"),
-        SHA_256("SHA-256", "SHA256"),
-        SHA_384("SHA-384", "SHA384"),
-        SHA_512("SHA-512", "SHA512"),
-        SHA3_256("SHA3-256", "SHA3-256"),
-        SHA3_512("SHA3-512", "SHA3-512"),
-        SHA3_384("SHA3-384", "SHA3-384"),
-        BLAKE2b_256("BLAKE2b-256", "BLAKE2b-256"),
-        BLAKE2b_384("BLAKE2b-384", "BLAKE2b-384"),
-        BLAKE2b_512("BLAKE2b-512", "BLAKE2b-512"),
-        BLAKE3("BLAKE3", "BLAKE3");
+        ADLER32(null, "ADLER32", null),
+        MD2(null, "MD2", "MD2"),
+        MD4(null, "MD4", null),
+        MD5("MD5", "MD5", "MD5"),
+        MD6(null, "MD6", null),
+        SHA1("SHA-1", "SHA1", "SHA-1"),
+        SHA224(null, "SHA224", "SHA-224"),
+        SHA_256("SHA-256", "SHA256", "SHA-256"),
+        SHA_384("SHA-384", "SHA384", "SHA-384"),
+        SHA_512("SHA-512", "SHA512", "SHA-512"),
+        SHA3_256("SHA3-256", "SHA3-256", "SHA3-256"),
+        SHA3_384("SHA3-384", "SHA3-384", "SHA3-384"),
+        SHA3_512("SHA3-512", "SHA3-512", "SHA3-512"),
+        BLAKE2b_256("BLAKE2b-256", "BLAKE2b-256", "BLAKE2B-256"),
+        BLAKE2b_384("BLAKE2b-384", "BLAKE2b-384", "BLAKE2B-384"),
+        BLAKE2b_512("BLAKE2b-512", "BLAKE2b-512", "BLAKE2B-512"),
+        BLAKE3("BLAKE3", "BLAKE3", "BLAKE3-256");
 
         private final @Nullable String cyclonedx;
         private final @Nullable String spdx;
+        private final @Nullable String jce;
 
-        ChecksumAlgorithm(@Nullable String cyclonedx, @Nullable String spdx) {
+        ChecksumAlgorithm(@Nullable String cyclonedx, @Nullable String spdx, @Nullable String jce) {
             this.cyclonedx = cyclonedx;
             this.spdx = spdx;
+            this.jce = jce;
         }
 
         /**
@@ -142,6 +144,13 @@ public interface Component {
                 }
             }
             throw new IllegalArgumentException("No enum constant with spec " + spec);
+        }
+
+        /**
+         * The name used by Java Cryptography Extensions.
+         */
+        public String toJce() {
+            return jce != null ? jce : name();
         }
     }
 

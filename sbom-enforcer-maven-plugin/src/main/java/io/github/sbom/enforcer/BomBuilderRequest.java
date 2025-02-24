@@ -18,6 +18,10 @@ package io.github.sbom.enforcer;
 import java.util.Collection;
 import org.eclipse.aether.artifact.Artifact;
 
+/**
+ * Request object to create a {@link BillOfMaterials} object.
+ * @see BomBuilder#build
+ */
 public interface BomBuilderRequest {
 
     Artifact getArtifact();

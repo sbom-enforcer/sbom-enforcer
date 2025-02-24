@@ -27,6 +27,9 @@ import java.util.TreeSet;
 import org.eclipse.aether.artifact.Artifact;
 import org.jspecify.annotations.Nullable;
 
+/**
+ * Default {@link Component} implementation.
+ */
 public final class DefaultComponent implements Component {
 
     private final Artifact artifact;

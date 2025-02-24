@@ -15,7 +15,6 @@
  */
 package io.github.sbom.enforcer;
 
-import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
 /**
@@ -23,5 +22,5 @@ import org.apache.maven.plugin.MojoFailureException;
  */
 public interface EnforcerRule {
 
-    void execute(BillOfMaterials bom) throws MojoExecutionException, MojoFailureException;
+    void execute(BillOfMaterials bom) throws MojoFailureException;
 }

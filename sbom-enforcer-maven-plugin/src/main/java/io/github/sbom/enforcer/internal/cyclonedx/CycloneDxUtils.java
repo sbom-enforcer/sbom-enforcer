@@ -18,7 +18,9 @@ package io.github.sbom.enforcer.internal.cyclonedx;
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
 import io.github.sbom.enforcer.BomBuildingException;
+import io.github.sbom.enforcer.Component.Properties;
 import java.io.File;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.cyclonedx.exception.ParseException;
@@ -53,7 +55,7 @@ public final class CycloneDxUtils {
 
     public static Artifact toArtifact(Component component) throws BomBuildingException {
         PackageURL packageURL = toPackageURL(component);
-        Map<String, String> qualifiers = packageURL.getQualifiers();
+        Map<String, String> qualifiers = safeGetQualifiers(packageURL);
         String type = qualifiers.getOrDefault(ArtifactProperties.TYPE, "jar");
         String classifier = qualifiers.get(CLASSIFIER);
         String repositoryUrl = qualifiers.get(REPOSITORY_URL);
@@ -61,7 +63,7 @@ public final class CycloneDxUtils {
         Map<String, String> properties = new HashMap<>();
         properties.put(ArtifactProperties.TYPE, type);
         if (repositoryUrl != null) {
-            properties.put(io.github.sbom.enforcer.Component.Properties.REPOSITORY_URL, repositoryUrl);
+            properties.put(Properties.REPOSITORY_URL, repositoryUrl);
         }
         return new DefaultArtifact(
                         packageURL.getNamespace(), packageURL.getName(), classifier, type, packageURL.getVersion())
@@ -82,14 +84,22 @@ public final class CycloneDxUtils {
 
     private static String getCycloneDxFormat(Artifact artifact) {
         if (CYCLONE_DX_CLASSIFIER.equals(artifact.getClassifier())) {
-            return switch (artifact.getExtension()) {
-                case XML -> XML;
-                case JSON -> JSON;
-                default -> throw new IllegalArgumentException(
-                        "Unsupported CycloneDX artifact type: " + artifact.getExtension() + ".");
-            };
+            switch (artifact.getExtension()) {
+                case XML:
+                    return XML;
+                case JSON:
+                    return JSON;
+                default:
+                    throw new IllegalArgumentException(
+                            "Unsupported CycloneDX artifact type: " + artifact.getExtension() + ".");
+            }
         }
         throw new IllegalArgumentException("Artifact " + artifact + " is not a CycloneDX document.");
+    }
+
+    private static Map<String, String> safeGetQualifiers(PackageURL packageURL) {
+        Map<String, String> qualifiers = packageURL.getQualifiers();
+        return qualifiers != null ? qualifiers : Collections.emptyMap();
     }
 
     private CycloneDxUtils() {}

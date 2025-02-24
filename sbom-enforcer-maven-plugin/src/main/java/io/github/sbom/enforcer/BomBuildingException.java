@@ -15,11 +15,8 @@
  */
 package io.github.sbom.enforcer;
 
-import java.io.Serial;
-
 public class BomBuildingException extends Exception {
 
-    @Serial
     private static final long serialVersionUID = 1L;
 
     public BomBuildingException(String message) {

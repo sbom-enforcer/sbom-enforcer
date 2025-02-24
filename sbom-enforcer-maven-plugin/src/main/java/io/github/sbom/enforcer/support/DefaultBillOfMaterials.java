@@ -25,6 +25,9 @@ import java.util.TreeSet;
 import java.util.function.Supplier;
 import org.jspecify.annotations.Nullable;
 
+/**
+ * Default {@link BillOfMaterials} implementation.
+ */
 public class DefaultBillOfMaterials implements BillOfMaterials {
 
     private final Component component;

@@ -21,7 +21,7 @@ import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 
 /**
- * An external reference with a deterministic sorting order.
+ * An {@link ExternalReference} implementation with a deterministic sorting order.
  */
 public final class DefaultExternalReference implements ExternalReference, Comparable<DefaultExternalReference> {
 
@@ -74,10 +74,11 @@ public final class DefaultExternalReference implements ExternalReference, Compar
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof DefaultExternalReference that)) return false;
-        return referenceType.equals(that.referenceType)
-                && location.equals(that.location)
-                && Objects.equals(contentType, that.contentType);
+        if (!(o instanceof ExternalReference)) return false;
+        ExternalReference that = (ExternalReference) o;
+        return getReferenceType().equals(that.getReferenceType())
+                && getLocation().equals(that.getLocation())
+                && Objects.equals(getContentType(), that.getContentType());
     }
 
     @Override

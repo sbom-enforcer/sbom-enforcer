@@ -13,17 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.sbom.enforcer.internal;
+@NullMarked
+package io.github.sbom.enforcer.rules;
 
-import org.eclipse.aether.artifact.Artifact;
-import org.eclipse.aether.artifact.ArtifactProperties;
-
-public final class BomUtils {
-
-    public static boolean isBomArtifact(Artifact artifact) {
-        String type = artifact.getProperty(ArtifactProperties.TYPE, "jar");
-        return "cyclonedx".equals(artifact.getClassifier()) && ("xml".equals(type) || "json".equals(type));
-    }
-
-    private BomUtils() {}
-}
+import org.jspecify.annotations.NullMarked;

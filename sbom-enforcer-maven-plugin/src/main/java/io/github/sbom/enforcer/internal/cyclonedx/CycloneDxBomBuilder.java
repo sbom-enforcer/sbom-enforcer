@@ -47,6 +47,7 @@ import org.eclipse.aether.resolution.ArtifactResolutionException;
  */
 @Named("cyclonedx")
 @Singleton
+@org.codehaus.plexus.component.annotations.Component(role = BomBuilder.class, hint = "cyclonedx")
 public class CycloneDxBomBuilder implements BomBuilder {
 
     private final RepositorySystem repoSystem;
