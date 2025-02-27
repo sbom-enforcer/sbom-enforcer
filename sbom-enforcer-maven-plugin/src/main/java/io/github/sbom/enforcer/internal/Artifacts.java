@@ -73,7 +73,7 @@ public final class Artifacts {
                 classifier,
                 artifact.getExtension(),
                 artifact.getVersion(),
-                Map.copyOf(artifact.getProperties()),
+                artifact.getProperties(),
                 artifact.getFile());
     }
 
@@ -84,7 +84,7 @@ public final class Artifacts {
                 artifact.getClassifier(),
                 extension,
                 artifact.getVersion(),
-                Map.copyOf(artifact.getProperties()),
+                artifact.getProperties(),
                 artifact.getFile());
     }
 

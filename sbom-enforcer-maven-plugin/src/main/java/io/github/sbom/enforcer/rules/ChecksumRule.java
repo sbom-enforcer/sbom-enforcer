@@ -61,7 +61,7 @@ public class ChecksumRule implements EnforcerRule {
                 throw new MojoFailureException(
                         null,
                         "Checksum failed for file " + file.getName(),
-                        "Expecting `" + expectedValue + "' but got `" + computedValue + "'");
+                        "Expecting `" + expectedValue + "` but got `" + computedValue + "`");
             }
         } catch (IllegalArgumentException e) {
             throw new MojoFailureException(
