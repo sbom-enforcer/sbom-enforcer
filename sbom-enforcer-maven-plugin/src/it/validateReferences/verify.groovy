@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-final String FAKE_SHA1 = 'b02c125db8b6d295adf72ae6e71af5d83bce2370'
-final String REAL_SHA1 = 'fc5d727c85ef48d3326e009391851928c7113e0d'
-
 File buildLog = new File(basedir, "build.log")
 assert buildLog.exists()
 List<String> errors = buildLog.readLines().findAll { it.startsWith("[ERROR]") }
-assert errors.contains("[ERROR] * Invalid SHA1 checksum for file log4j-api-2.24.3.jar: expecting `$REAL_SHA1` but got `$FAKE_SHA1`".toString())
+assert errors.contains('[ERROR] * Broken external reference (404): https://errorprone.info/error_prone_annotations')
+assert errors.contains('[ERROR] * Broken external reference (404): https://github.com/google/error-prone/error_prone_annotations')

@@ -69,8 +69,9 @@ public class CycloneDxBomBuilder implements BomBuilder {
         org.cyclonedx.model.Component cdxComponent = getMainComponent(request, bom);
         Component mainComponent =
                 processMainComponent(cdxComponent, request.getArtifact(), request.getAllBillsOfMaterials());
-        DefaultBillOfMaterials.Builder builder =
-                DefaultBillOfMaterials.newBuilder().setComponent(mainComponent);
+        DefaultBillOfMaterials.Builder builder = DefaultBillOfMaterials.newBuilder()
+                .setBillOfMaterials(request.getMainBillOfMaterials())
+                .setComponent(mainComponent);
         // Create dependencies
         for (org.cyclonedx.model.Component dependency : bom.getComponents()) {
             builder.addDependency(createDependency(repoSession, dependency));

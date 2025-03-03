@@ -89,7 +89,7 @@
   </distributionManagement>
 
   <properties>
-    <maven.compiler.release>8</maven.compiler.release>
+    <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <revision>0.1.0-SNAPSHOT</revision>
 
@@ -147,10 +147,10 @@
     <!--
       ~ Dependencies provided by Maven.
       ~
-      ~ Baseline: Maven 3.6.x
+      ~ Baseline: Maven 3.9.x
       -->
-    <maven.version>3.8.8</maven.version>
-    <maven-resolver.version>1.6.3</maven-resolver.version>
+    <maven.version>3.9.9</maven.version>
+    <maven-resolver.version>1.9.22</maven-resolver.version>
     <!-- Pinned transitive versions -->
     <jackson.version>2.18.2</jackson.version>
 

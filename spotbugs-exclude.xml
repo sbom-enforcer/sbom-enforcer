@@ -24,4 +24,12 @@
     <Class name="io.github.sbom.enforcer.CheckMojo"/>
     <Bug pattern="EI_EXPOSE_REP2"/>
   </Match>
+  <Match>
+    <Class name="io.github.sbom.enforcer.internal.cyclonedx.CycloneDxBomBuilder"/>
+    <Bug pattern="EI_EXPOSE_REP2"/>
+  </Match>
+  <Match>
+    <Class name="io.github.sbom.enforcer.rules.ValidateReferencesRule"/>
+    <Bug pattern="EI_EXPOSE_REP2"/>
+  </Match>
 </FindBugsFilter>

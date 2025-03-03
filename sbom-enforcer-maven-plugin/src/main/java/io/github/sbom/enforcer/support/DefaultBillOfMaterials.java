@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Supplier;
+import org.eclipse.aether.artifact.Artifact;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -30,6 +31,7 @@ import org.jspecify.annotations.Nullable;
  */
 public class DefaultBillOfMaterials implements BillOfMaterials {
 
+    private final Artifact billOfMaterials;
     private final Component component;
     private final Set<Component> dependencies;
 
@@ -37,9 +39,15 @@ public class DefaultBillOfMaterials implements BillOfMaterials {
         return new Builder();
     }
 
-    private DefaultBillOfMaterials(Component component, Set<Component> dependencies) {
+    private DefaultBillOfMaterials(Artifact billOfMaterials, Component component, Set<Component> dependencies) {
+        this.billOfMaterials = billOfMaterials;
         this.component = component;
         this.dependencies = Collections.unmodifiableSet(dependencies);
+    }
+
+    @Override
+    public Artifact getBillOfMaterials() {
+        return billOfMaterials;
     }
 
     @Override
@@ -53,11 +61,17 @@ public class DefaultBillOfMaterials implements BillOfMaterials {
     }
 
     public static final class Builder implements Supplier<BillOfMaterials> {
+        private @Nullable Artifact billOfMaterials;
         private @Nullable Component component;
         private final Set<Component> dependencies =
                 new TreeSet<>((left, right) -> Artifacts.compare(left.getArtifact(), right.getArtifact()));
 
         public Builder() {}
+
+        public Builder setBillOfMaterials(Artifact billOfMaterials) {
+            this.billOfMaterials = billOfMaterials;
+            return this;
+        }
 
         public Builder setComponent(Component component) {
             this.component = component;
@@ -71,10 +85,13 @@ public class DefaultBillOfMaterials implements BillOfMaterials {
 
         @Override
         public BillOfMaterials get() {
+            if (billOfMaterials == null) {
+                throw new IllegalStateException("No SBOM has been specified");
+            }
             if (component == null) {
                 throw new IllegalStateException("No component has been specified");
             }
-            return new DefaultBillOfMaterials(component, dependencies);
+            return new DefaultBillOfMaterials(billOfMaterials, component, dependencies);
         }
     }
 }

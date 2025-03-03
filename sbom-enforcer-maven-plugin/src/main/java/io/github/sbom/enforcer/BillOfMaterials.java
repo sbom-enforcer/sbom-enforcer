@@ -16,11 +16,17 @@
 package io.github.sbom.enforcer;
 
 import java.util.Collection;
+import org.eclipse.aether.artifact.Artifact;
 
 /**
  * A simplified and format independent model of a Software Bill of Materials (SBOM).
  */
 public interface BillOfMaterials {
+
+    /**
+     * Returns the artifact used to generate this object.
+     */
+    Artifact getBillOfMaterials();
 
     /**
      * Returns the component described by this bill of materials.

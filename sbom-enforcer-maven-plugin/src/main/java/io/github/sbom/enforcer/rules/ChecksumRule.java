@@ -22,11 +22,14 @@ import io.github.sbom.enforcer.EnforcerRule;
 import java.io.File;
 import java.io.IOException;
 import java.security.MessageDigest;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.inject.Named;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.maven.plugin.MojoFailureException;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Rules to check if the checksums present in the SBOM are correct.
@@ -35,42 +38,51 @@ import org.apache.maven.plugin.MojoFailureException;
 public class ChecksumRule implements EnforcerRule {
     @Override
     public void execute(BillOfMaterials bom) throws MojoFailureException {
-        checkChecksums(bom.getComponent());
+        List<String> errors = new ArrayList<>(validateChecksums(bom.getComponent()));
         for (Component dependency : bom.getDependencies()) {
-            checkChecksums(dependency);
+            errors.addAll(validateChecksums(dependency));
+        }
+
+        if (!errors.isEmpty()) {
+            String message = errors.stream()
+                    .sorted()
+                    .collect(Collectors.joining(
+                            "\n* ",
+                            "\nSBOM " + bom.getBillOfMaterials().getFile() + " contains invalid checksums:\n* ",
+                            ""));
+            throw new MojoFailureException(message);
         }
     }
 
-    private static void checkChecksums(Component component) throws MojoFailureException {
+    private static List<String> validateChecksums(Component component) {
         File file = component.getArtifact().getFile();
         if (!file.exists()) {
-            throw new MojoFailureException("Missing file for artifact " + component.getArtifact());
+            return List.of("Missing file for artifact: " + component.getArtifact());
         }
-        for (Map.Entry<ChecksumAlgorithm, String> entry :
-                component.getChecksums().entrySet()) {
-            checkChecksum(entry.getKey(), entry.getValue(), file);
-        }
+        return component.getChecksums().entrySet().stream()
+                .<String>mapMulti((entry, consumer) -> {
+                    String error = validateChecksum(entry.getKey(), entry.getValue(), file);
+                    if (error != null) {
+                        consumer.accept(error);
+                    }
+                })
+                .toList();
     }
 
-    private static void checkChecksum(ChecksumAlgorithm algorithm, String expectedValue, File file)
-            throws MojoFailureException {
+    private static @Nullable String validateChecksum(ChecksumAlgorithm algorithm, String expectedValue, File file) {
         try {
             MessageDigest digest = DigestUtils.getDigest(algorithm.toJce());
             String computedValue = Hex.encodeHexString(DigestUtils.digest(digest, file));
             if (!expectedValue.equals(computedValue)) {
-                throw new MojoFailureException(
-                        null,
-                        "Checksum failed for file " + file.getName(),
-                        "Expecting `" + expectedValue + "` but got `" + computedValue + "`");
+                return "Invalid " + algorithm + " checksum for file " + file.getName() + ": expecting `" + expectedValue
+                        + "` but got `" + computedValue + "`";
             }
         } catch (IllegalArgumentException e) {
-            throw new MojoFailureException(
-                    "Failed to calculate checksum for file " + file.getName() + ": algorithm " + algorithm.toJce()
-                            + " is not supported.",
-                    e);
+            return "Failed to calculate checksum for file " + file.getName() + ": algorithm " + algorithm.toJce()
+                    + " is not supported.";
         } catch (IOException e) {
-            throw new MojoFailureException(
-                    "Failed to calculate checksum for file " + file.getName() + ": I/O error.", e);
+            return "Failed to calculate checksum for file " + file.getName() + ": " + e.getMessage();
         }
+        return null;
     }
 }
