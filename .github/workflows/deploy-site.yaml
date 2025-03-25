@@ -17,6 +17,12 @@ name: Deploy documentation to GitHub Pages
 
 on:
   workflow_call:
+    inputs:
+      ref:
+        description: "The branch to build"
+        type: string
+        required: true
+        default: refs/heads/main
 
 permissions:
   contents: read
@@ -31,6 +37,8 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # 4.2.2
+        with:
+          ref: ${{ inputs.ref }}
 
       - name: Setup JDK
         uses: actions/setup-java@3a4f6e1af504cf6a31855fa899c6aa5355ba6c12 # 4.7.0
