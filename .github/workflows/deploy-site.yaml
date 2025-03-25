@@ -33,9 +33,6 @@ concurrency:
 jobs:
 
   build:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
 
@@ -46,6 +43,7 @@ jobs:
         uses: actions/setup-java@3a4f6e1af504cf6a31855fa899c6aa5355ba6c12 # 4.7.0
         with:
           distribution: "temurin"
+          java-version-file: .java-version
 
       - name: Generate site
         shell: bash
@@ -66,6 +64,8 @@ jobs:
           path: target/site
 
   deploy:
+    needs: build
+    runs-on: ubuntu-latest
 
     permissions:
       pages: write
@@ -74,7 +74,6 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
 
     steps:
       - name: Deploy to GitHub Pages

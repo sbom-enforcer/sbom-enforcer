@@ -462,9 +462,6 @@
             <phase>verify</phase>
             <configuration>
               <consoleOutput>true</consoleOutput>
-              <licensesApproved>
-                <license>Apache-2.0</license>
-              </licensesApproved>
               <!-- Files which should be considered binary -->
               <excludes>
                 <exclude>.java-version</exclude>
