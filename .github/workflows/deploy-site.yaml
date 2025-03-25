@@ -16,9 +16,7 @@
 name: Deploy documentation to GitHub Pages
 
 on:
-  push:
-    branches: ["site"]
-  workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
