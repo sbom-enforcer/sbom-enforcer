@@ -21,7 +21,6 @@ on:
       ref:
         description: "The branch to build"
         type: string
-        required: true
         default: refs/heads/main
 
 permissions:
