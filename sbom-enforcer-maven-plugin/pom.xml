@@ -16,7 +16,8 @@
   ~ limitations under the License.
   ~
   ~ end::license[] -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>io.github.sbom-enforcer</groupId>
@@ -28,13 +29,29 @@
   <packaging>maven-plugin</packaging>
   <name>SBOM Enforcer Maven Plugin</name>
   <description>Performs a configurable list of checks on generated Software Bills of Materials (SBOMs).</description>
+  <url>https://sbom-enforcer.github.io/maven-plugin</url>
+
+  <distributionManagement>
+    <site>
+      <id>site</id>
+      <name>Website</name>
+      <url>https://sbom-enforcer.github.io/maven-plugin</url>
+    </site>
+  </distributionManagement>
+
+  <properties>
+    <maven-plugin-report-plugin.version>3.15.0</maven-plugin-report-plugin.version>
+
+    <!-- Site attributes -->
+    <project-version>${project.version}</project-version>
+  </properties>
 
   <dependencies>
 
     <!--
       ~ Dependencies provided Maven.
       ~
-      ~ Baseline: Maven 3.6.x
+      ~ Baseline: Maven 3.9.x
       -->
     <dependency>
       <groupId>org.apache.maven</groupId>
@@ -204,4 +221,35 @@
 
     </plugins>
   </build>
+
+  <reporting>
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>plugins</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-plugin-report-plugin</artifactId>
+        <version>${maven-plugin-report-plugin.version}</version>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>report-no-fork</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+
+    </plugins>
+  </reporting>
 </project>

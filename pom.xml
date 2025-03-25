@@ -25,6 +25,7 @@
   <packaging>pom</packaging>
 
   <name>SBOM Enforcer Parent</name>
+  <url>https://sbom-enforcer.github.io</url>
   <inceptionYear>2025</inceptionYear>
 
   <organization>
@@ -82,9 +83,9 @@
       <url>https://repo.maven.apache.org/maven2</url>
     </repository>
     <site>
-      <id>github</id>
-      <name>Github page</name>
-      <url>https://github.com/sbom-enforcer/sbom-enforcer</url>
+      <id>site</id>
+      <name>Website</name>
+      <url>https://sbom-enforcer.github.io</url>
     </site>
   </distributionManagement>
 
@@ -100,8 +101,7 @@
     <!-- Enable reproducible builds -->
     <project.build.outputTimestamp>2024-09-17T18:07:00Z</project.build.outputTimestamp>
 
-    <!-- Disable maven-site-plugin -->
-    <maven.site.skip>true</maven.site.skip>
+    <!-- Disable maven-site-plugin deploy -->
     <maven.site.deploy.skip>true</maven.site.deploy.skip>
 
     <!-- Maven plugin dependencies -->
@@ -157,6 +157,11 @@
     <!-- Dummy version will be updated by parse-version mojo -->
     <parsedVersion.majorVersion />
     <parsedVersion.minorVersion />
+
+    <!-- Maven plugins version -->
+    <asciidoctor-parser-doxia-module.version>3.2.0</asciidoctor-parser-doxia-module.version>
+    <maven-site-plugin.version>3.21.0</maven-site-plugin.version>
+    <maven-project-info-reports-plugin.version>3.9.0</maven-project-info-reports-plugin.version>
   </properties>
 
   <dependencyManagement>
@@ -397,6 +402,12 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-plugin-plugin</artifactId>
           <version>${maven-plugin-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-project-info-reports-plugin</artifactId>
+          <version>${maven-project-info-reports-plugin.version}</version>
         </plugin>
 
         <plugin>
@@ -699,8 +710,55 @@
         </configuration>
       </plugin>
 
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>${maven-site-plugin.version}</version>
+        <configuration>
+          <topSiteURL>https://sbom-enforcer.github.io</topSiteURL>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.asciidoctor</groupId>
+            <artifactId>asciidoctor-parser-doxia-module</artifactId>
+            <version>${asciidoctor-parser-doxia-module.version}</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <id>default-site</id>
+            <configuration>
+              <locales>default</locales>
+              <attributes>
+                <cyclonedx-version>2.9.1</cyclonedx-version>
+                <project-version>${project.version}</project-version>
+              </attributes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
   </build>
+
+  <reporting>
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>plugins</report>
+              <report>team</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+
+    </plugins>
+  </reporting>
 
   <profiles>
 
