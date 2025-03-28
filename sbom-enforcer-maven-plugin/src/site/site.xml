@@ -26,23 +26,24 @@
   </skin>
   <body>
     <breadcrumbs>
-      <item name="SBOM Enforcer" href="../index.html"/>
-      <item name="Maven Plugin" href="./index.html"/>
+      <item name="SBOM Enforcer" href="../"/>
+      <item name="Maven Plugin" href="./"/>
     </breadcrumbs>
     <menu name="Documentation">
-      <item name="Introduction" href="./index.html"/>
-      <item name="Usage" href="./usage.html"/>
-      <item name="Goals" href="./plugin-info.html">
+      <item name="Introduction" href="./"/>
+      <item name="Usage" href="./usage"/>
+      <item name="Goals" href="./plugin-info">
+        <!-- The `.html` suffix is hardcoded in the `plugin-info` page, so let's keep it coherent -->
         <item name="sbom-enforcer:check" href="./check-mojo.html"/>
       </item>
-      <item name="Rules" href="./rules.html">
-        <item name="checksum" href="./rules.html#checksum"/>
-        <item name="validateReferences" href="./rules.html#validate-references"/>
+      <item name="Rules" href="./rules">
+        <item name="checksum" href="./rules#checksum"/>
+        <item name="validateReferences" href="./rules#validate-references"/>
       </item>
-      <item name="Team" href="./team.html"/>
+      <item name="Team" href="./team"/>
     </menu>
     <menu name="Build Reports">
-      <item name="Build Plugins" href="./plugins.html"/>
+      <item name="Build Plugins" href="./plugins"/>
     </menu>
   </body>
 </site>

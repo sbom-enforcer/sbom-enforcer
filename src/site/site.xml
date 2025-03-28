@@ -26,17 +26,17 @@
   </skin>
   <body>
     <breadcrumbs>
-      <item name="SBOM Enforcer" href="./index.html"/>
+      <item name="SBOM Enforcer" href="./"/>
     </breadcrumbs>
     <menu name="Documentation">
-      <item name="Welcome" href="./index.html"/>
-      <item name="Team" href="./team.html"/>
+      <item name="Welcome" href="./"/>
+      <item name="Team" href="./team"/>
     </menu>
     <menu name="Modules">
-      <item name="Maven Plugin" href="maven-plugin/index.html"/>
+      <item name="Maven Plugin" href="maven-plugin/"/>
     </menu>
     <menu name="Build Reports">
-      <item name="Build Plugins" href="./plugins.html"/>
+      <item name="Build Plugins" href="./plugins"/>
     </menu>
   </body>
 
