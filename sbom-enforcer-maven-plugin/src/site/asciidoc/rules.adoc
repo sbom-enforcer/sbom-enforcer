@@ -26,7 +26,7 @@ Since the Maven local repository is used both as cache for consumed artifacts an
 [TIP]
 ====
 This rule is mostly useful in a `release` profile, together with the
-link:./check-mojo#forcedependencyupdate[`forceDependencyUpdate`]
+link:./check-mojo.html#forcedependencyupdate[`forceDependencyUpdate`]
 plugin parameter.
 ====
 

@@ -25,4 +25,4 @@ See xref:usage.adoc[Usage] to start using the plugin.
 
 Goals::
 +
-For more details on the goals offered by this plugin, see xref:plugin-info[Goals].
+For more details on the goals offered by this plugin, see xref:plugin-info.html[Goals].
