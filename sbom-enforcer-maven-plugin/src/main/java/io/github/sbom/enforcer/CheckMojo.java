@@ -47,6 +47,12 @@ import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.aether.repository.WorkspaceReader;
 import org.jspecify.annotations.Nullable;
 
+/**
+ * Performs a configurable set of checks on the SBOMs attached to the build.
+ * <p>
+ *     See <a href="https://sbom-enforcer.github.io/maven-plugin/rules.html">Rules</a> for a list of available rules.
+ * </p>
+ */
 @Mojo(name = "check", defaultPhase = LifecyclePhase.VERIFY)
 public class CheckMojo extends AbstractMojo {
 
