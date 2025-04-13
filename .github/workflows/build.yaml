@@ -52,7 +52,7 @@ jobs:
           echo MIMIR_KEY="mimir-cache-$(date +'%Y-%m')" >> $GITHUB_ENV
           MIMIR_PATH="$HOME/.mimir/local"
           case `uname` in
-            MINGW*) MIMIR_PATH=`cygpath -w "MIMIR_PATH"`;;
+            MINGW*) MIMIR_PATH=`cygpath -w "$MIMIR_PATH"`;;
           esac
           echo MIMIR_PATH="$MIMIR_PATH" >> $GITHUB_ENV
 
