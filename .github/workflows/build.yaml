@@ -38,10 +38,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683   # 4.2.2
 
-      - name: Set up Java
+      - name: Setup Java
         uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00   # 4.7.1
         with:
-          java-version: 17
+          distribution: temurin
+          java-version: 21
 
       - name: Setup Mimir
         shell: bash
