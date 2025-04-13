@@ -9,3 +9,4 @@ target/
 *.iml
 # Maven files
 .flattened-pom.xml
+/.mvn/extensions.xml

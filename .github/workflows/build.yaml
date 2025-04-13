@@ -1,0 +1,84 @@
+#
+# Copyright © 2025 Christian Grobmeier, Piotr P. Karwasz
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - "main"
+  pull_request: { }
+
+jobs:
+
+  verify:
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ macos-latest, ubuntu-latest, windows-latest ]
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683   # 4.2.2
+
+      - name: Setup Java
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00   # 4.7.1
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Mimir
+        shell: bash
+        run: |
+          cp .github/build-extensions.xml .mvn/extensions.xml
+          cat .mvn/extensions.xml
+          echo MIMIR_KEY="mimir-cache-$(date +'%Y-%m')" >> $GITHUB_ENV
+          MIMIR_PATH="$HOME/.mimir/local"
+          case `uname` in
+            MINGW*) MIMIR_PATH=`cygpath -w "$MIMIR_PATH"`;;
+          esac
+          echo MIMIR_PATH="$MIMIR_PATH" >> $GITHUB_ENV
+
+      - name: Setup Mimir Cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684   # 4.2.3
+        with:
+          # Mimir contains an exact copy of part of Maven Central.
+          # Therefore, we only need to clean it from time to time to remove old versions.
+          key: ${{ env.MIMIR_KEY }}
+          path: ${{ env.MIMIR_PATH }}
+          enableCrossOsArchive: true
+
+      - name: Build
+        id: build
+        shell: bash
+        run: |
+          ./mvnw \
+            --show-version --batch-mode --errors --no-transfer-progress \
+            -DtrimStackTrace=false \
+            verify
+
+      # We upload tests results.
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02   # 4.6.2
+        with:
+          name: "test-report-${{matrix.os}}-${{github.run_number}}-${{github.run_attempt}}"
+          path: |
+            **/target/surefire-reports
