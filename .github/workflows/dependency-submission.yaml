@@ -25,8 +25,11 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  submit-dependencies:
+    name: Submit Dependencies
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
 
