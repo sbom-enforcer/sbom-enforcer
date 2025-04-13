@@ -50,7 +50,12 @@ jobs:
           cp .github/build-extensions.xml .mvn/extensions.xml
           cat .mvn/extensions.xml
           echo MIMIR_KEY="mimir-cache-$(date +'%Y-%m')" >> $GITHUB_ENV
-          echo MIMIR_PATH="$HOME/.mimir/local" >> $GITHUB_ENV
+          MIMIR_PATH="$HOME/.mimir/local"
+          uname
+          case `uname` in
+            *CYGWIN*) basedir=`cygpath -w "$basedir"`;;
+          esac
+          echo MIMIR_PATH="$MIMIR_PATH" >> $GITHUB_ENV
 
       - name: Setup Mimir Cache
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684   # 4.2.3
@@ -59,6 +64,7 @@ jobs:
           # Therefore, we only need to clean it from time to time to remove old versions.
           key: ${{ env.MIMIR_KEY }}
           path: ${{ env.MIMIR_PATH }}
+          enableCrossOsArchive: true
 
       - name: Build
         id: build
