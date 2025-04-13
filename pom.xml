@@ -140,7 +140,7 @@
     <!-- Dependency versions -->
     <assertj.version>3.27.3</assertj.version>
     <junit.version>5.11.4</junit.version>
-    <maven-plugin-annotations.version>3.14.0</maven-plugin-annotations.version>
+    <maven-plugin-annotations.version>3.15.1</maven-plugin-annotations.version>
     <osgi-annotation-bundle.version>2.0.0</osgi-annotation-bundle.version>
     <osgi-annotation-versioning.version>1.1.2</osgi-annotation-versioning.version>
     <slf4j.version>2.0.16</slf4j.version>
