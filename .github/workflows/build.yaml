@@ -51,9 +51,8 @@ jobs:
           cat .mvn/extensions.xml
           echo MIMIR_KEY="mimir-cache-$(date +'%Y-%m')" >> $GITHUB_ENV
           MIMIR_PATH="$HOME/.mimir/local"
-          uname
           case `uname` in
-            *CYGWIN*) basedir=`cygpath -w "$basedir"`;;
+            MINGW*) MIMIR_PATH=`cygpath -w "MIMIR_PATH"`;;
           esac
           echo MIMIR_PATH="$MIMIR_PATH" >> $GITHUB_ENV
 
