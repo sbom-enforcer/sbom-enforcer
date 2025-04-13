@@ -92,7 +92,7 @@
   <properties>
     <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <revision>0.1.0</revision>
+    <revision>0.1.1-SNAPSHOT</revision>
 
     <!-- `bnd-maven-plugin` 7.x requires a Maven version `3.8.1` or higher -->
     <javaBuildVersion>17</javaBuildVersion>
@@ -766,9 +766,13 @@
 
   <profiles>
 
+    <!--
+      ~ Profile active for all JARs that will be published to Maven Central.
+      ~ POMs are not published.
+      -->
     <profile>
 
-      <id>flatten-jar-pom</id>
+      <id>published-module</id>
 
       <activation>
         <file>
@@ -802,8 +806,22 @@
               </execution>
             </executions>
           </plugin>
+
+          <plugin>
+            <groupId>biz.aQute.bnd</groupId>
+            <artifactId>bnd-baseline-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>check-compatibility</id>
+                <goals>
+                  <goal>baseline</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
         </plugins>
       </build>
+
     </profile>
 
     <profile>
