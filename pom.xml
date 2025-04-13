@@ -45,7 +45,7 @@
     <developer>
       <id>pkarwasz</id>
       <name>Piotr P. Karwasz</name>
-      <email>pkarwasz@apache.org</email>
+      <email>piotr@pom.copernik.eu</email>
       <timezone>Europe/Warsaw</timezone>
     </developer>
     <developer>
@@ -92,14 +92,14 @@
   <properties>
     <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <revision>0.1.0-SNAPSHOT</revision>
+    <revision>0.1.1-SNAPSHOT</revision>
 
     <!-- `bnd-maven-plugin` 7.x requires a Maven version `3.8.1` or higher -->
     <javaBuildVersion>17</javaBuildVersion>
     <minimalMavenBuildVersion>3.8.1</minimalMavenBuildVersion>
 
     <!-- Enable reproducible builds -->
-    <project.build.outputTimestamp>2024-09-17T18:07:00Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2025-04-13T14:18:46Z</project.build.outputTimestamp>
 
     <!-- Disable maven-site-plugin deploy -->
     <maven.site.deploy.skip>true</maven.site.deploy.skip>
@@ -114,7 +114,7 @@
     <apache-rat-plugin.version>0.16.1</apache-rat-plugin.version>
     <bnd-baseline-maven-plugin.version>7.0.0</bnd-baseline-maven-plugin.version>
     <build-helper-maven-plugin.version>3.6.0</build-helper-maven-plugin.version>
-    <central-publishing-maven-plugin.version>0.5.0</central-publishing-maven-plugin.version>
+    <central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
     <commons-codec.version>1.18.0</commons-codec.version>
     <cyclonedx-maven-plugin.version>2.8.1</cyclonedx-maven-plugin.version>
     <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>
@@ -766,9 +766,13 @@
 
   <profiles>
 
+    <!--
+      ~ Profile active for all JARs that will be published to Maven Central.
+      ~ POMs are not published.
+      -->
     <profile>
 
-      <id>flatten-jar-pom</id>
+      <id>published-module</id>
 
       <activation>
         <file>
@@ -802,8 +806,22 @@
               </execution>
             </executions>
           </plugin>
+
+          <plugin>
+            <groupId>biz.aQute.bnd</groupId>
+            <artifactId>bnd-baseline-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>check-compatibility</id>
+                <goals>
+                  <goal>baseline</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
         </plugins>
       </build>
+
     </profile>
 
     <profile>
@@ -956,6 +974,7 @@
             <artifactId>central-publishing-maven-plugin</artifactId>
             <extensions>true</extensions>
             <configuration>
+              <excludeArtifacts>sbom-enforcer-parent</excludeArtifacts>
               <publishingServerId>central</publishingServerId>
             </configuration>
           </plugin>
