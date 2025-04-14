@@ -39,7 +39,7 @@
   </distributionManagement>
 
   <properties>
-    <maven-plugin-report-plugin.version>3.15.0</maven-plugin-report-plugin.version>
+    <maven-plugin-report-plugin.version>3.15.1</maven-plugin-report-plugin.version>
 
     <!-- Site attributes -->
     <project-version>${project.version}</project-version>
