@@ -112,7 +112,7 @@
     <!-- Maven plugin versions -->
     <apache-jar-resource-bundle.version>1.5</apache-jar-resource-bundle.version>
     <apache-rat-plugin.version>0.16.1</apache-rat-plugin.version>
-    <bnd-baseline-maven-plugin.version>7.0.0</bnd-baseline-maven-plugin.version>
+    <bnd-baseline-maven-plugin.version>7.1.0</bnd-baseline-maven-plugin.version>
     <build-helper-maven-plugin.version>3.6.0</build-helper-maven-plugin.version>
     <central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
     <commons-codec.version>1.18.0</commons-codec.version>
