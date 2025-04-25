@@ -56,7 +56,7 @@ public class ChecksumRule implements EnforcerRule {
 
     private static List<String> validateChecksums(Component component) {
         File file = component.getArtifact().getFile();
-        if (!file.exists()) {
+        if (file == null || !file.exists()) {
             return List.of("Missing file for artifact: " + component.getArtifact());
         }
         return component.getChecksums().entrySet().stream()

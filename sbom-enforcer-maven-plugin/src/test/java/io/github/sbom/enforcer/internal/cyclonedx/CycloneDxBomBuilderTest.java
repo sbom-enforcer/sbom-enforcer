@@ -18,18 +18,23 @@ package io.github.sbom.enforcer.internal.cyclonedx;
 import static io.github.sbom.enforcer.internal.Artifacts.withClassifier;
 import static io.github.sbom.enforcer.internal.Artifacts.withExtension;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
 import io.github.sbom.enforcer.BillOfMaterials;
 import io.github.sbom.enforcer.BomBuilderRequest;
+import io.github.sbom.enforcer.BomBuildingException;
 import io.github.sbom.enforcer.Component;
 import io.github.sbom.enforcer.support.DefaultBomBuilderRequest;
+import io.github.sbom.enforcer.support.DefaultComponent;
 import io.github.sbom.enforcer.support.DefaultExternalReference;
 import java.io.File;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.stream.Stream;
 import org.codehaus.plexus.ContainerConfiguration;
 import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
@@ -48,13 +53,15 @@ import org.eclipse.aether.spi.localrepo.LocalRepositoryManagerFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class CycloneDxBomBuilderTest {
 
-    private static final PackageURL log4jCorePurl =
-            createPurl("pkg:maven/org.apache.logging.log4j/log4j-core@2.24.3?type=jar");
-    private static final PackageURL log4jApiPurl =
-            createPurl("pkg:maven/org.apache.logging.log4j/log4j-api@2.24.3?type=jar");
+    private static final PackageURL log4jCorePurl = createPurl("pkg:maven/org.apache.logging.log4j/log4j-core@2.24.3");
+    private static final PackageURL log4jApiPurl = createPurl("pkg:maven/org.apache.logging.log4j/log4j-api@2.24.3");
+    private static final PackageURL minimalPurl = createPurl("pkg:maven/groupId/artifactId");
 
     @TempDir
     private static Path localRepositoryPath;
@@ -98,28 +105,17 @@ class CycloneDxBomBuilderTest {
     }
 
     @Test
-    void testCreateBom() throws Exception {
+    void createSingleDepBom() throws Exception {
         CycloneDxBomBuilder builder = new CycloneDxBomBuilder(repoSystem);
-        Artifact artifact = new DefaultArtifact("org.apache.logging.log4j", "log4j-core", null, "jar", "2.24.3");
-        File bomFile =
-                new File(Objects.requireNonNull(CycloneDxBomBuilderTest.class.getResource("/simple-cyclonedx.xml"))
-                        .toURI());
-        Artifact bomArtifact = withExtension(withClassifier(artifact, "cyclonedx"), "xml");
-        bomArtifact = bomArtifact.setFile(bomFile);
-
-        BomBuilderRequest request = DefaultBomBuilderRequest.newBuilder()
-                .setArtifact(artifact)
-                .setMainBillOfMaterials(bomArtifact)
-                .get();
-
+        BomBuilderRequest request = createRequest("single-dep-cyclonedx.xml");
         BillOfMaterials bom = builder.build(repoSession, request);
         assertThat(bom).isNotNull();
         // Main component
         Component component = bom.getComponent();
         assertThat(component).isNotNull();
         assertThat(component.getPurl()).isEqualTo(log4jCorePurl);
-        assertThat(component.getArtifact()).isEqualTo(artifact);
-        assertThat(component.getBillsOfMaterials()).hasSize(1).containsExactly(bomArtifact);
+        assertThat(component.getArtifact()).isEqualTo(request.getArtifact());
+        assertThat(component.getBillsOfMaterials()).hasSize(1).containsExactly(request.getMainBillOfMaterials());
         assertThat(component.getChecksums()).isEmpty();
         assertThat(component.getExternalReferences())
                 .hasSize(1)
@@ -138,5 +134,80 @@ class CycloneDxBomBuilderTest {
                 .containsEntry(Component.ChecksumAlgorithm.MD5, "d89516699543c5c21be87ee1760695f3")
                 .containsEntry(Component.ChecksumAlgorithm.SHA1, "b02c125db8b6d295adf72ae6e71af5d83bce2370");
         assertThat(dependency.getExternalReferences()).isEmpty();
+    }
+
+    @Test
+    void createNoDepBom() throws Exception {
+        CycloneDxBomBuilder builder = new CycloneDxBomBuilder(repoSystem);
+        BomBuilderRequest request = createRequest("no-dep-cyclonedx.xml");
+        BillOfMaterials bom = builder.build(repoSession, request);
+        assertThat(bom).isNotNull();
+        // Main component
+        Component component = bom.getComponent();
+        assertThat(component).isNotNull();
+        assertThat(component.getPurl()).isEqualTo(log4jCorePurl);
+        assertThat(component.getArtifact()).isEqualTo(request.getArtifact());
+        assertThat(component.getBillsOfMaterials()).hasSize(1).containsExactly(request.getMainBillOfMaterials());
+        assertThat(component.getChecksums()).isEmpty();
+        assertThat(component.getExternalReferences()).isEmpty();
+    }
+
+    @Test
+    void createEmptyBom() throws Exception {
+        CycloneDxBomBuilder builder = new CycloneDxBomBuilder(repoSystem);
+        BomBuilderRequest request = createRequest("empty-cyclonedx.xml");
+        assertThatThrownBy(() -> builder.build(repoSession, request)).isInstanceOf(BomBuildingException.class);
+    }
+
+    static Stream<Arguments> processValidComponent() throws MalformedPackageURLException {
+        org.cyclonedx.model.Component withPurl = new org.cyclonedx.model.Component();
+        withPurl.setName("log4j-api");
+        withPurl.setPurl(log4jApiPurl);
+        org.cyclonedx.model.Component withoutPurl = new org.cyclonedx.model.Component();
+        withoutPurl.setGroup("org.apache.logging.log4j");
+        withoutPurl.setName("log4j-api");
+        withoutPurl.setVersion("2.24.3");
+        org.cyclonedx.model.Component withoutVersion = new org.cyclonedx.model.Component();
+        withoutVersion.setGroup("org.apache.logging.log4j");
+        withoutVersion.setName("log4j-api");
+
+        Component log4jApi = DefaultComponent.newBuilder()
+                .setPurl(log4jApiPurl)
+                .setArtifact(createArtifact(minimalPurl))
+                .get();
+        Component versionLessLog4jApi = DefaultComponent.newBuilder()
+                .setPurl(new PackageURL("pkg:maven/org.apache.logging.log4j/log4j-api"))
+                .setArtifact(createArtifact(minimalPurl))
+                .get();
+        return Stream.of(
+                Arguments.of(log4jApi, withPurl),
+                Arguments.of(log4jApi, withoutPurl),
+                Arguments.of(versionLessLog4jApi, withoutVersion));
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    void processValidComponent(Component expectedOutput, org.cyclonedx.model.Component input)
+            throws BomBuildingException {
+        DefaultComponent.Builder builder = DefaultComponent.newBuilder().setArtifact(createArtifact(minimalPurl));
+        CycloneDxBomBuilder.processGenericComponent(builder, input);
+        assertThat(builder.get()).isEqualTo(expectedOutput);
+    }
+
+    private static Artifact createArtifact(PackageURL purl) {
+        return new DefaultArtifact(purl.getNamespace(), purl.getName(), null, null, purl.getVersion());
+    }
+
+    private static BomBuilderRequest createRequest(String bomResource) throws URISyntaxException {
+        Artifact artifact = createArtifact(log4jCorePurl);
+        File bomFile = new File(Objects.requireNonNull(CycloneDxBomBuilderTest.class.getResource("/" + bomResource))
+                .toURI());
+        Artifact bomArtifact = withExtension(withClassifier(artifact, "cyclonedx"), "xml");
+        bomArtifact = bomArtifact.setFile(bomFile);
+
+        return DefaultBomBuilderRequest.newBuilder()
+                .setArtifact(artifact)
+                .setMainBillOfMaterials(bomArtifact)
+                .get();
     }
 }
