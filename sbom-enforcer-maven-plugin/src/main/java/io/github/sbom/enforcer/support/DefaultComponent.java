@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import org.eclipse.aether.artifact.Artifact;
@@ -78,6 +79,22 @@ public final class DefaultComponent implements Component {
     @Override
     public Map<ChecksumAlgorithm, String> getChecksums() {
         return checksums;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof DefaultComponent that)) return false;
+        return artifact.equals(that.artifact)
+                && Objects.equals(purl, that.purl)
+                && billsOfMaterials.equals(that.billsOfMaterials)
+                && externalReferences.equals(that.externalReferences)
+                && checksums.equals(that.checksums);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(artifact, purl, billsOfMaterials, externalReferences, checksums);
     }
 
     public static final class Builder {

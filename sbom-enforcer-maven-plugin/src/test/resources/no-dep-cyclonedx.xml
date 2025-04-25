@@ -16,31 +16,14 @@
   ~ limitations under the License.
   ~
   ~ end::license[] -->
-<bom xmlns="http://cyclonedx.org/schema/bom/1.6">
+<bom xmlns="http://cyclonedx.org/schema/bom/1.6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://cyclonedx.org/schema/bom/1.6 https://cyclonedx.org/schema/bom-1.6.xsd">
   <metadata>
     <component type="library">
       <group>org.apache.logging.log4j</group>
       <name>log4j-core</name>
       <version>2.24.3</version>
-      <purl>pkg:maven/org.apache.logging.log4j/log4j-core@2.24.3?type=jar</purl>
-      <externalReferences>
-        <reference type="vulnerability-assertion">
-          <url>https://logging.apache.org/cyclonedx/vdr.xml</url>
-        </reference>
-      </externalReferences>
+      <purl>pkg:maven/org.apache.logging.log4j/log4j-core@2.24.3</purl>
     </component>
   </metadata>
-  <components>
-    <component type="library" bom-ref="pkg:maven/org.apache.logging.log4j/log4j-api@2.24.3?type=jar">
-      <publisher>The Apache Software Foundation</publisher>
-      <group>org.apache.logging.log4j</group>
-      <name>log4j-api</name>
-      <version>2.24.3</version>
-      <hashes>
-        <hash alg="MD5">d89516699543c5c21be87ee1760695f3</hash>
-        <hash alg="SHA-1">b02c125db8b6d295adf72ae6e71af5d83bce2370</hash>
-      </hashes>
-      <purl>pkg:maven/org.apache.logging.log4j/log4j-api@2.24.3?type=jar</purl>
-    </component>
-  </components>
 </bom>

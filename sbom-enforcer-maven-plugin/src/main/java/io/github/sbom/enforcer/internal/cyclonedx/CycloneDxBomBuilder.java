@@ -15,8 +15,11 @@
  */
 package io.github.sbom.enforcer.internal.cyclonedx;
 
+import static io.github.sbom.enforcer.internal.CollectionUtils.nullToEmpty;
+
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
+import com.github.packageurl.PackageURLBuilder;
 import io.github.sbom.enforcer.BillOfMaterials;
 import io.github.sbom.enforcer.BomBuilder;
 import io.github.sbom.enforcer.BomBuilderRequest;
@@ -28,7 +31,6 @@ import io.github.sbom.enforcer.support.DefaultBillOfMaterials;
 import io.github.sbom.enforcer.support.DefaultComponent;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -73,7 +75,7 @@ public class CycloneDxBomBuilder implements BomBuilder {
                 .setBillOfMaterials(request.getMainBillOfMaterials())
                 .setComponent(mainComponent);
         // Create dependencies
-        for (org.cyclonedx.model.Component dependency : bom.getComponents()) {
+        for (org.cyclonedx.model.Component dependency : nullToEmpty(bom.getComponents())) {
             builder.addDependency(createDependency(repoSession, dependency));
         }
         return builder.get();
@@ -140,25 +142,34 @@ public class CycloneDxBomBuilder implements BomBuilder {
         return bomArtifacts;
     }
 
-    private static void processGenericComponent(
-            DefaultComponent.Builder builder, org.cyclonedx.model.Component component) throws BomBuildingException {
+    // package-private for testing
+    static void processGenericComponent(DefaultComponent.Builder builder, org.cyclonedx.model.Component component)
+            throws BomBuildingException {
         String purl = component.getPurl();
         try {
-            builder.setPurl(new PackageURL(purl));
+            if (purl != null) {
+                builder.setPurl(new PackageURL(purl));
+            } else {
+                String group = component.getGroup();
+                if (group != null) {
+                    builder.setPurl(PackageURLBuilder.aPackageURL()
+                            .withType(PackageURL.StandardTypes.MAVEN)
+                            .withNamespace(group)
+                            .withName(component.getName())
+                            .withVersion(component.getVersion())
+                            .build());
+                } else {
+                    throw new BomBuildingException("Missing PURL for component " + component);
+                }
+            }
         } catch (MalformedPackageURLException e) {
-            throw new BomBuildingException("Unable to parse invalid pURL: " + purl);
+            throw new BomBuildingException("Unable to parse PURL for component: " + component, e);
         }
-        List<Hash> hashes = component.getHashes();
-        if (hashes != null) {
-            for (Hash hash : hashes) {
-                builder.addChecksum(ChecksumAlgorithm.fromCycloneDx(hash.getAlgorithm()), hash.getValue());
-            }
+        for (Hash hash : nullToEmpty(component.getHashes())) {
+            builder.addChecksum(ChecksumAlgorithm.fromCycloneDx(hash.getAlgorithm()), hash.getValue());
         }
-        List<ExternalReference> externalReferences = component.getExternalReferences();
-        if (externalReferences != null) {
-            for (ExternalReference externalReference : externalReferences) {
-                builder.addExternalReference(externalReference.getType().getTypeName(), externalReference.getUrl());
-            }
+        for (ExternalReference externalReference : nullToEmpty(component.getExternalReferences())) {
+            builder.addExternalReference(externalReference.getType().getTypeName(), externalReference.getUrl());
         }
     }
 }
