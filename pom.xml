@@ -105,7 +105,7 @@
     <maven.site.deploy.skip>true</maven.site.deploy.skip>
 
     <!-- Maven plugin dependencies -->
-    <error_prone.version>2.32.0</error_prone.version>
+    <error_prone.version>2.38.0</error_prone.version>
     <findsecbugs-plugin.version>1.14.0</findsecbugs-plugin.version>
     <palantir-java-format.version>2.63.0</palantir-java-format.version>
 
@@ -532,6 +532,7 @@
             <arg>-Xlint:all</arg>
             <arg>-XDcompilePolicy=simple</arg>
             <arg>-Xplugin:ErrorProne</arg>
+            <arg>--should-stop=ifError=FLOW</arg>
           </compilerArgs>
           <annotationProcessorPaths>
             <path>
