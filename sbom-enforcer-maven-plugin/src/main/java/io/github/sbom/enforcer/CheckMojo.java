@@ -137,17 +137,22 @@ public class CheckMojo extends AbstractMojo {
         }
     }
 
-    private void checkArtifact(Artifact artifact, List<? extends EnforcerRule> rules) throws MojoFailureException {
-        org.eclipse.aether.artifact.Artifact aetherArtifact = Artifacts.toArtifact(artifact);
+    private void checkArtifact(Artifact bomArtifact, List<? extends EnforcerRule> rules) throws MojoFailureException {
+        org.eclipse.aether.artifact.Artifact mainBillOfMaterials = Artifacts.toArtifact(bomArtifact);
         for (BomBuilder bomBuilder : bomBuilders) {
-            if (bomBuilder.isSupported(aetherArtifact)) {
+            if (bomBuilder.isSupported(mainBillOfMaterials)) {
                 try {
                     RepositorySystemSession effectiveRepoSession =
                             forceDependencyUpdate ? new NoCacheRepositorySystemSession(repoSession) : repoSession;
 
+                    // POM projects don't have a resolved artifact
+                    org.eclipse.aether.artifact.Artifact artifact = Artifacts.toArtifact(project.getArtifact());
+                    if ("pom".equals(project.getPackaging()) && artifact.getFile() == null) {
+                        artifact = artifact.setFile(project.getFile());
+                    }
                     BomBuilderRequest request = DefaultBomBuilderRequest.newBuilder()
-                            .setArtifact(Artifacts.toArtifact(project.getArtifact()))
-                            .setMainBillOfMaterials(aetherArtifact)
+                            .setArtifact(artifact)
+                            .setMainBillOfMaterials(mainBillOfMaterials)
                             .get();
 
                     BillOfMaterials billOfMaterials = bomBuilder.build(effectiveRepoSession, request);
@@ -155,7 +160,7 @@ public class CheckMojo extends AbstractMojo {
                         rule.execute(billOfMaterials);
                     }
                 } catch (BomBuildingException e) {
-                    throw new MojoFailureException("Failed to parse BOM artifact " + aetherArtifact, e);
+                    throw new MojoFailureException("Failed to parse BOM artifact " + mainBillOfMaterials, e);
                 }
                 break;
             }
