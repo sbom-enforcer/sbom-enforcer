@@ -43,6 +43,10 @@
     </menu>
     <menu name="Build Reports">
       <item name="Build Plugins" href="./plugins.html"/>
+      <item name="Code Coverage" href="jacoco/index.html"/>
+      <item name="SAST">
+        <item name="Spotbugs" href="spotbugs.html"/>
+      </item>
     </menu>
   </body>
 </site>
