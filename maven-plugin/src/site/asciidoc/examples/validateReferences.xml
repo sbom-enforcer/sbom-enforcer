@@ -31,6 +31,13 @@
       <maxFailuresPerHost>3</maxFailuresPerHost>
       <!-- Timeout for the HTTP requests in ms -->
       <timeoutMs>5000</timeoutMs>
+
+      <!-- Reference types to include. Empty means all -->
+      <includes/>
+      <!-- Reference types to exclude -->
+      <excludes>
+        <exclude>distribution-intake</exclude>
+      </excludes>
     </validateReferences>
   </rules>
 </configuration>

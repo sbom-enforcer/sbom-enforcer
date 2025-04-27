@@ -17,6 +17,7 @@ package io.github.sbom.enforcer.rules;
 
 import io.github.sbom.enforcer.BillOfMaterials;
 import io.github.sbom.enforcer.Component;
+import io.github.sbom.enforcer.Component.ExternalReference;
 import io.github.sbom.enforcer.EnforcerRule;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -25,6 +26,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +79,16 @@ public class ValidateReferencesRule implements EnforcerRule {
      */
     int maxFailuresPerHost = DEFAULT_MAX_FAILURES_PER_HOST;
 
+    /**
+     * List of external reference types to include in the check.
+     */
+    Set<String> includes = Set.of();
+
+    /**
+     * List of external reference types to exclude from the check.
+     */
+    Set<String> excludes = Set.of("distribution-intake");
+
     @Inject
     public ValidateReferencesRule(Logger logger) {
         this(logger, new JreHttpUrlChecker(logger));
@@ -114,6 +126,7 @@ public class ValidateReferencesRule implements EnforcerRule {
 
     private List<String> validateReferences(Component component) {
         return component.getExternalReferences().stream()
+                .filter(this::shouldCheck)
                 .<String>mapMulti((ref, consumer) -> {
                     String errorMessage = validateReference(ref.getLocation());
                     if (errorMessage != null) {
@@ -121,6 +134,16 @@ public class ValidateReferencesRule implements EnforcerRule {
                     }
                 })
                 .toList();
+    }
+
+    private boolean shouldCheck(ExternalReference externalReference) {
+        String referenceType = externalReference.getReferenceType();
+        if (!includes.isEmpty()) {
+            if (!includes.contains(referenceType)) {
+                return false;
+            }
+        }
+        return !excludes.contains(referenceType);
     }
 
     @Nullable
@@ -209,6 +232,22 @@ public class ValidateReferencesRule implements EnforcerRule {
      */
     public void setTimeoutMs(int timeoutMs) {
         urlChecker.setTimeoutMs(timeoutMs);
+    }
+
+    public Set<String> getIncludes() {
+        return Collections.unmodifiableSet(includes);
+    }
+
+    public void setIncludes(Set<String> includes) {
+        this.includes = includes;
+    }
+
+    public Set<String> getExcludes() {
+        return Collections.unmodifiableSet(excludes);
+    }
+
+    public void setExcludes(Set<String> excludes) {
+        this.excludes = excludes;
     }
 
     interface HttpUrlChecker {

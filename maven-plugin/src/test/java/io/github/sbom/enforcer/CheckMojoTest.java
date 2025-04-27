@@ -158,6 +158,8 @@ class CheckMojoTest {
                 .as("maxFailuresPerHost")
                 .isEqualTo(expectedRule.getMaxFailuresPerHost());
         assertThat(actualRule.getTimeoutMs()).as("timeoutMs").isEqualTo(expectedRule.getTimeoutMs());
+        assertThat(actualRule.getIncludes()).as("includes").isEqualTo(expectedRule.getIncludes());
+        assertThat(actualRule.getExcludes()).as("excludes").isEqualTo(expectedRule.getExcludes());
     }
 
     private static final PlexusConfiguration validateReferencesConfiguration = // language=xml
@@ -170,6 +172,13 @@ class CheckMojoTest {
                       <failOnRedirect>true</failOnRedirect>
                       <maxFailuresPerHost>5</maxFailuresPerHost>
                       <timeoutMs>1000</timeoutMs>
+                      <includes>
+                        <include>foo</include>
+                        <include>bar</include>
+                      </includes>
+                      <excludes>
+                        <exclude>baz</exclude>
+                      </excludes>
                     </validateReferences>""");
 
     @Test
@@ -180,7 +189,8 @@ class CheckMojoTest {
         assertThat(rules).hasSize(1);
         assertThat(rules.get(0)).isInstanceOf(ValidateReferencesRule.class);
 
-        VerifyReferencesConfiguration expected = new VerifyReferencesConfiguration(false, true, true, true, 5, 1000);
+        VerifyReferencesConfiguration expected = new VerifyReferencesConfiguration(
+                false, true, true, true, 5, 1000, Set.of("foo", "bar"), Set.of("baz"));
         ValidateReferencesRule rule = (ValidateReferencesRule) rules.get(0);
         assertThat(rule.isCheckDependencies()).as("checkDependencies").isEqualTo(expected.checkDependencies());
         assertThat(rule.isFailOnAuth()).as("failOnAuth").isEqualTo(expected.failOnAuth());
@@ -188,6 +198,8 @@ class CheckMojoTest {
         assertThat(rule.isFailOnDependencies()).as("failOnDependencies").isEqualTo(expected.failOnDependencies());
         assertThat(rule.getMaxFailuresPerHost()).as("maxFailuresPerHost").isEqualTo(expected.maxFailuresPerHost());
         assertThat(rule.getTimeoutMs()).as("timeoutMs").isEqualTo(expected.timeoutMs());
+        assertThat(rule.getIncludes()).as("includes").isEqualTo(expected.includes());
+        assertThat(rule.getExcludes()).as("excludes").isEqualTo(expected.excludes());
     }
 
     record VerifyReferencesConfiguration(
@@ -196,7 +208,9 @@ class CheckMojoTest {
             boolean failOnRedirect,
             boolean failOnDependencies,
             int maxFailuresPerHost,
-            int timeoutMs) {}
+            int timeoutMs,
+            Set<String> includes,
+            Set<String> excludes) {}
 
     static Stream<Arguments> createEnforcerRules_invalid() {
         return Stream.of(

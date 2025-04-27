@@ -35,11 +35,12 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.channels.ServerSocketChannel;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.plexus.logging.Logger;
@@ -55,28 +56,16 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class ValidateReferencesRuleTest {
 
-    private static final URL URL_200;
-    private static final URL URL_301;
-    private static final URL URL_302;
-    private static final URL URL_401;
-    private static final URL URL_403;
-    private static final URL URL_EXCEPTION;
+    private static final URI URI_200 = URI.create("https://example/200");
+    // Explicit usage of `http`
+    private static final URI URI_301 = URI.create("http://example/301");
+    private static final URI URI_302 = URI.create("https://example/302");
+    private static final URI URI_401 = URI.create("https://example/401");
+    private static final URI URI_403 = URI.create("https://example/403");
+    private static final URI URI_EXCEPTION = URI.create("https://example/exception");
 
     private static final String SSH_URL = "ssh://git@example/repo.git";
     private static final String INVALID_URL = "invalid url";
-
-    static {
-        try {
-            URL_200 = new URL("https://example/200");
-            URL_301 = new URL("http://example/301");
-            URL_302 = new URL("https://example/302");
-            URL_401 = new URL("https://example/401");
-            URL_403 = new URL("https://example/403");
-            URL_EXCEPTION = new URL("https://example/exception");
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     static Stream<Arguments> urlChecker_works() {
         return Stream.of(
@@ -108,27 +97,27 @@ class ValidateReferencesRuleTest {
 
     private static HttpUrlChecker createMockHttpUrlChecker() throws IOException {
         HttpUrlChecker urlChecker = mock(HttpUrlChecker.class);
-        when(urlChecker.getResponseCode(URL_200)).thenReturn(200);
-        when(urlChecker.getResponseCode(URL_301)).thenReturn(301);
-        when(urlChecker.getResponseCode(URL_302)).thenReturn(302);
-        when(urlChecker.getResponseCode(URL_401)).thenReturn(401);
-        when(urlChecker.getResponseCode(URL_403)).thenReturn(403);
-        when(urlChecker.getResponseCode(URL_EXCEPTION)).thenThrow(new IOException("Test exception"));
+        when(urlChecker.getResponseCode(URI_200.toURL())).thenReturn(200);
+        when(urlChecker.getResponseCode(URI_301.toURL())).thenReturn(301);
+        when(urlChecker.getResponseCode(URI_302.toURL())).thenReturn(302);
+        when(urlChecker.getResponseCode(URI_401.toURL())).thenReturn(401);
+        when(urlChecker.getResponseCode(URI_403.toURL())).thenReturn(403);
+        when(urlChecker.getResponseCode(URI_EXCEPTION.toURL())).thenThrow(new IOException("Test exception"));
         return urlChecker;
     }
 
     static Stream<Arguments> validateReference_successfulConnection() {
         return Stream.of(
-                Arguments.of(false, false, URL_200.toExternalForm(), false),
-                Arguments.of(false, false, URL_301.toExternalForm(), false),
-                Arguments.of(false, false, URL_302.toExternalForm(), false),
-                Arguments.of(false, false, URL_401.toExternalForm(), false),
-                Arguments.of(true, false, URL_301.toExternalForm(), true),
-                Arguments.of(true, false, URL_302.toExternalForm(), true),
-                Arguments.of(true, false, URL_401.toExternalForm(), false),
-                Arguments.of(false, true, URL_301.toExternalForm(), false),
-                Arguments.of(false, true, URL_302.toExternalForm(), false),
-                Arguments.of(false, true, URL_401.toExternalForm(), true),
+                Arguments.of(false, false, URI_200.toASCIIString(), false),
+                Arguments.of(false, false, URI_301.toASCIIString(), false),
+                Arguments.of(false, false, URI_302.toASCIIString(), false),
+                Arguments.of(false, false, URI_401.toASCIIString(), false),
+                Arguments.of(true, false, URI_301.toASCIIString(), true),
+                Arguments.of(true, false, URI_302.toASCIIString(), true),
+                Arguments.of(true, false, URI_401.toASCIIString(), false),
+                Arguments.of(false, true, URI_301.toASCIIString(), false),
+                Arguments.of(false, true, URI_302.toASCIIString(), false),
+                Arguments.of(false, true, URI_401.toASCIIString(), true),
                 Arguments.of(false, false, SSH_URL, false));
     }
 
@@ -152,7 +141,7 @@ class ValidateReferencesRuleTest {
 
     static Stream<Arguments> validateReference_failedConnection() {
         return Stream.of(
-                Arguments.of(URL_EXCEPTION.toExternalForm(), "Failed to connect"),
+                Arguments.of(URI_EXCEPTION.toASCIIString(), "Failed to connect"),
                 Arguments.of(INVALID_URL, "not a valid URI"));
     }
 
@@ -182,25 +171,25 @@ class ValidateReferencesRuleTest {
 
         int i;
         for (i = 0; i < rule.maxFailuresPerHost; i++) {
-            assertThat(rule.validateReference(URL_EXCEPTION.toExternalForm()))
+            assertThat(rule.validateReference(URI_EXCEPTION.toASCIIString()))
                     .as("error message on attempt %d", i + 1)
                     .contains("Failed to connect");
         }
-        assertThat(rule.validateReference(URL_EXCEPTION.toExternalForm()))
+        assertThat(rule.validateReference(URI_EXCEPTION.toASCIIString()))
                 .as("error message on attempt %d", i + 1)
                 .isNull();
     }
 
     @Test
-    void validateReference_caching() throws IOException {
+    void validateReference_caching() throws Exception {
         HttpUrlChecker urlChecker = createMockHttpUrlChecker();
         Logger logger = mock(Logger.class);
         ValidateReferencesRule rule = new ValidateReferencesRule(logger, urlChecker);
 
-        rule.validateReference(URL_301.toExternalForm());
-        verify(urlChecker, times(1)).getResponseCode(URL_301);
-        rule.validateReference(URL_301.toExternalForm());
-        verify(urlChecker, times(1)).getResponseCode(URL_301);
+        rule.validateReference(URI_301.toASCIIString());
+        verify(urlChecker, times(1)).getResponseCode(URI_301.toURL());
+        rule.validateReference(URI_301.toASCIIString());
+        verify(urlChecker, times(1)).getResponseCode(URI_301.toURL());
     }
 
     static Stream<Arguments> failOnDependencies() {
@@ -222,7 +211,7 @@ class ValidateReferencesRuleTest {
         rule.setCheckDependencies(checkDependencies);
         rule.setFailOnDependencies(failOnDependencies);
         // Create BOM
-        BillOfMaterials bom = createMockBillOfMaterials(Map.of(), Map.of("website", URL_EXCEPTION.toExternalForm()));
+        BillOfMaterials bom = createMockBillOfMaterials(Map.of(), Map.of("website", URI_EXCEPTION.toASCIIString()));
 
         if (checkDependencies && failOnDependencies) {
             assertThatThrownBy(() -> rule.execute(bom)).isInstanceOf(MojoFailureException.class);
@@ -230,31 +219,69 @@ class ValidateReferencesRuleTest {
             assertDoesNotThrow(() -> rule.execute(bom));
         }
         if (checkDependencies) {
-            verify(urlChecker, times(1)).getResponseCode(URL_EXCEPTION);
+            verify(urlChecker, times(1)).getResponseCode(URI_EXCEPTION.toURL());
         } else {
             verify(urlChecker, never()).getResponseCode(any());
         }
     }
 
     static Stream<Arguments> failsOnMainComponent() {
-        return Stream.of(Arguments.of(URL_EXCEPTION, true), Arguments.of(URL_200, false));
+        return Stream.of(Arguments.of(URI_EXCEPTION, true), Arguments.of(URI_200, false));
     }
 
     @ParameterizedTest
     @MethodSource
-    void failsOnMainComponent(URL url, boolean failure) throws IOException {
+    void failsOnMainComponent(URI uri, boolean failure) throws IOException {
         HttpUrlChecker urlChecker = createMockHttpUrlChecker();
         Logger logger = mock(Logger.class);
         ValidateReferencesRule rule = new ValidateReferencesRule(logger, urlChecker);
         // Create BOM
-        BillOfMaterials bom = createMockBillOfMaterials(Map.of("website", url.toExternalForm()), Map.of());
+        BillOfMaterials bom = createMockBillOfMaterials(Map.of("website", uri.toASCIIString()), Map.of());
 
         if (failure) {
             assertThatThrownBy(() -> rule.execute(bom))
                     .isInstanceOf(MojoFailureException.class)
-                    .hasMessageContaining(url.toExternalForm());
+                    .hasMessageContaining(uri.toASCIIString());
         } else {
             assertDoesNotThrow(() -> rule.execute(bom));
+        }
+    }
+
+    static Stream<Arguments> checkIncludeExcludeLogic() {
+        return Stream.of(
+                Arguments.of(Set.of(), Set.of(), Set.of(URI_200, URI_301, URI_401)),
+                Arguments.of(Set.of("foo"), Set.of(), Set.of(URI_200)),
+                Arguments.of(Set.of(), Set.of("distribution-intake"), Set.of(URI_200, URI_301)));
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    void checkIncludeExcludeLogic(Set<String> includes, Set<String> excludes, Set<URI> expectedChecks)
+            throws Exception {
+        HttpUrlChecker urlChecker = createMockHttpUrlChecker();
+        Logger logger = mock(Logger.class);
+        ValidateReferencesRule rule = new ValidateReferencesRule(logger, urlChecker);
+        rule.setIncludes(includes);
+        rule.setExcludes(excludes);
+        rule.setCheckDependencies(false);
+        // Create BOM
+        BillOfMaterials bom = createMockBillOfMaterials(
+                Map.of(
+                        "foo",
+                        URI_200.toASCIIString(),
+                        "bar",
+                        URI_301.toASCIIString(),
+                        "distribution-intake",
+                        URI_401.toASCIIString()),
+                Map.of());
+
+        rule.execute(bom);
+        for (URI uri : new URI[] {URI_200, URI_301, URI_401}) {
+            if (expectedChecks.contains(uri)) {
+                verify(urlChecker, times(1)).getResponseCode(uri.toURL());
+            } else {
+                verify(urlChecker, never()).getResponseCode(uri.toURL());
+            }
         }
     }
 
