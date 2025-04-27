@@ -49,7 +49,6 @@ import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.codehaus.plexus.util.xml.Xpp3DomBuilder;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -64,13 +63,11 @@ class CheckMojoTest {
     private static Path localRepositoryPath;
 
     private static PlexusContainer container;
-    private static RepositorySystem repoSystem;
     private static RepositorySystemSession repoSession;
 
     @BeforeAll
     static void setup() throws Exception {
         container = MojoUtils.setupContainer();
-        repoSystem = container.lookup(RepositorySystem.class);
         repoSession = MojoUtils.createRepositorySystemSession(container, localRepositoryPath);
     }
 
@@ -104,18 +101,26 @@ class CheckMojoTest {
         return new CheckMojo(null, session, mojoExecution, configurator, Set.of(), container);
     }
 
-    private static PlexusConfiguration fromString(String configuration) throws IOException, XmlPullParserException {
-        Xpp3Dom dom = Xpp3DomBuilder.build(new StringReader(configuration));
-        return new XmlPlexusConfiguration(dom);
+    private static PlexusConfiguration fromString(String configuration) {
+        try {
+            Xpp3Dom dom = Xpp3DomBuilder.build(new StringReader(configuration));
+            return new XmlPlexusConfiguration(dom);
+        } catch (XmlPullParserException | IOException e) {
+            throw new AssertionError(e);
+        }
     }
 
-    private static PlexusConfiguration fromExample(Path path) throws IOException, XmlPullParserException {
-        Path examples = Paths.get(System.getProperty("asciidoc.examples", "."));
-        Path absolutePath = examples.resolve(path);
-        assertThat(absolutePath).exists();
-        try (Reader reader = Files.newBufferedReader(absolutePath, StandardCharsets.UTF_8)) {
-            Xpp3Dom dom = Xpp3DomBuilder.build(reader);
-            return new XmlPlexusConfiguration(dom.getChild("rules").getChild(0));
+    private static PlexusConfiguration fromExample(Path path) {
+        try {
+            Path examples = Paths.get(System.getProperty("asciidoc.examples", "."));
+            Path absolutePath = examples.resolve(path);
+            assertThat(absolutePath).exists();
+            try (Reader reader = Files.newBufferedReader(absolutePath, StandardCharsets.UTF_8)) {
+                Xpp3Dom dom = Xpp3DomBuilder.build(reader);
+                return new XmlPlexusConfiguration(dom.getChild("rules").getChild(0));
+            }
+        } catch (XmlPullParserException | IOException e) {
+            throw new AssertionError(e);
         }
     }
 
@@ -128,44 +133,72 @@ class CheckMojoTest {
         assertThat(rules.get(0)).isInstanceOf(ChecksumRule.class);
     }
 
-    static Stream<Arguments> createEnforcerRules_validateReferences() throws IOException, XmlPullParserException {
-        return Stream.of(
-                Arguments.of(
-                        fromString("<validateReferences/>"),
-                        new VerifyReferencesConfiguration(false, false, false, 3, 5000)),
-                Arguments.of(
-                        fromExample(Paths.get("validateReferences.xml")),
-                        new VerifyReferencesConfiguration(true, true, true, 5, 1000)));
+    /**
+     * Checks if the default values are as documented.
+     */
+    @Test
+    void createEnforcerRules_validateReferences_defaultValuesFromDoc() throws Exception {
+        CheckMojo mojo = createCheckMojo();
+        mojo.addRule(fromExample(Paths.get("validateReferences.xml")));
+        mojo.addRule(fromString("<validateReferences/>"));
+        List<? extends EnforcerRule> rules = mojo.createEnforcerRules();
+        assertThat(rules).hasSize(2).allMatch(rule -> rule instanceof ValidateReferencesRule);
+
+        ValidateReferencesRule expectedRule = (ValidateReferencesRule) rules.get(0);
+        ValidateReferencesRule actualRule = (ValidateReferencesRule) rules.get(1);
+        assertThat(actualRule.isCheckDependencies())
+                .as("checkDependencies")
+                .isEqualTo(expectedRule.isCheckDependencies());
+        assertThat(actualRule.isFailOnAuth()).as("failOnAuth").isEqualTo(expectedRule.isFailOnAuth());
+        assertThat(actualRule.isFailOnRedirect()).as("failOnRedirect").isEqualTo(expectedRule.isFailOnRedirect());
+        assertThat(actualRule.isFailOnDependencies())
+                .as("failOnDependencies")
+                .isEqualTo(expectedRule.isFailOnDependencies());
+        assertThat(actualRule.getMaxFailuresPerHost())
+                .as("maxFailuresPerHost")
+                .isEqualTo(expectedRule.getMaxFailuresPerHost());
+        assertThat(actualRule.getTimeoutMs()).as("timeoutMs").isEqualTo(expectedRule.getTimeoutMs());
     }
 
-    @ParameterizedTest
-    @MethodSource
-    void createEnforcerRules_validateReferences(PlexusConfiguration xmlRule, VerifyReferencesConfiguration expected)
-            throws Exception {
+    private static final PlexusConfiguration validateReferencesConfiguration = // language=xml
+            fromString(
+                    """
+                    <validateReferences>
+                      <checkDependencies>false</checkDependencies>
+                      <failOnAuth>true</failOnAuth>
+                      <failOnDependencies>true</failOnDependencies>
+                      <failOnRedirect>true</failOnRedirect>
+                      <maxFailuresPerHost>5</maxFailuresPerHost>
+                      <timeoutMs>1000</timeoutMs>
+                    </validateReferences>""");
+
+    @Test
+    void createEnforcerRules_validateReferences() throws Exception {
         CheckMojo mojo = createCheckMojo();
-        mojo.addRule(xmlRule);
+        mojo.addRule(validateReferencesConfiguration);
         List<? extends EnforcerRule> rules = mojo.createEnforcerRules();
         assertThat(rules).hasSize(1);
         assertThat(rules.get(0)).isInstanceOf(ValidateReferencesRule.class);
 
+        VerifyReferencesConfiguration expected = new VerifyReferencesConfiguration(false, true, true, true, 5, 1000);
         ValidateReferencesRule rule = (ValidateReferencesRule) rules.get(0);
+        assertThat(rule.isCheckDependencies()).as("checkDependencies").isEqualTo(expected.checkDependencies());
         assertThat(rule.isFailOnAuth()).as("failOnAuth").isEqualTo(expected.failOnAuth());
         assertThat(rule.isFailOnRedirect()).as("failOnRedirect").isEqualTo(expected.failOnRedirect());
-        assertThat(rule.isFailOnDependencyReferences())
-                .as("failOnDependencyReferences")
-                .isEqualTo(expected.failOnDependencyReferences());
+        assertThat(rule.isFailOnDependencies()).as("failOnDependencies").isEqualTo(expected.failOnDependencies());
         assertThat(rule.getMaxFailuresPerHost()).as("maxFailuresPerHost").isEqualTo(expected.maxFailuresPerHost());
         assertThat(rule.getTimeoutMs()).as("timeoutMs").isEqualTo(expected.timeoutMs());
     }
 
     record VerifyReferencesConfiguration(
+            boolean checkDependencies,
             boolean failOnAuth,
             boolean failOnRedirect,
-            boolean failOnDependencyReferences,
+            boolean failOnDependencies,
             int maxFailuresPerHost,
             int timeoutMs) {}
 
-    static Stream<Arguments> createEnforcerRules_invalid() throws IOException, XmlPullParserException {
+    static Stream<Arguments> createEnforcerRules_invalid() {
         return Stream.of(
                 Arguments.of(fromString("<invalidRule/>"), "Failed to instantiate"),
                 Arguments.of(

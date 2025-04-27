@@ -36,8 +36,25 @@ plugin parameter.
 The `validateReferences` checks the URLs contained in your SBOM file to look for broken links.
 It accepts the following configuration options:
 
-[#validate-references-fail-on-dependency-references]
-=== `failOnDependencyReferences`
+[#validate-references-check-dependencies]
+=== `checkDependencies`
+
+[cols="1h,5"]
+|===
+
+| Type
+| `boolean`
+
+| Default
+| `true`
+
+| Description
+|
+If `true` (default), the rule will also check the external references from dependency components.
+|===
+
+[#validate-references-fail-on-dependencies]
+=== `failOnDependencies`
 
 [cols="1h,5"]
 |===
