@@ -184,26 +184,6 @@ public class CheckMojo extends AbstractMojo {
         return enforcerRules;
     }
 
-    public boolean isForceDependencyUpdate() {
-        return forceDependencyUpdate;
-    }
-
-    public void setForceDependencyUpdate(boolean forceDependencyUpdate) {
-        this.forceDependencyUpdate = forceDependencyUpdate;
-    }
-
-    public RepositorySystemSession getRepoSession() {
-        return repoSession;
-    }
-
-    public void setRepoSession(RepositorySystemSession repoSession) {
-        this.repoSession = repoSession;
-    }
-
-    public void setRules(PlexusConfiguration rules) {
-        this.rules = rules;
-    }
-
     public void addRule(PlexusConfiguration rule) {
         rules.addChild(rule);
     }
