@@ -139,3 +139,40 @@ After the limit has been reached, the rule will ignore links to that HTTP domain
 |
 Maximum number of milliseconds to wait for each URL.
 |===
+
+[#validate-references-includes]
+=== `includes`
+
+[cols="1h,5"]
+|===
+
+| Type
+| `Set<String>`
+
+| Default
+| _empty_
+
+| Description
+|
+Set of external reference types to include in the check.
+If empty, all types will be checked.
+See also <<validate-references-excludes>>.
+|===
+
+[#validate-references-excludes]
+=== `excludes`
+
+[cols="1h,5"]
+|===
+
+| Type
+| `Set<String>`
+
+| Default
+| `distribution-intake`
+
+| Description
+|
+Set of external reference types to exclude from the check.
+By default `distribution-intake` is excluded, since it is not very useful to SBOM consumers and usually requires authentication.
+|===
