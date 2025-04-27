@@ -87,3 +87,38 @@ If `true`, the rule will fail if any reference returns a `301` or `302` code.
 |
 If `true`, the rule will fail if any reference returns a `401` or `403` code.
 |===
+
+[#validate-references-max-failures-per-host]
+=== `maxFailuresPerHost`
+
+[cols="1h,5"]
+|===
+
+| Type
+| `int`
+
+| Default
+| `3`
+
+| Description
+|
+Maximum number of IO errors for each HTTP domain.
+After the limit has been reached, the rule will ignore links to that HTTP domain.
+|===
+
+[#validate-references-timeout-ms]
+=== `timeoutMs`
+
+[cols="1h,5"]
+|===
+
+| Type
+| `int`
+
+| Default
+| `5000`
+
+| Description
+|
+Maximum number of milliseconds to wait for each URL.
+|===

@@ -25,13 +25,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.plexus.logging.Logger;
 import org.jspecify.annotations.Nullable;
 
@@ -44,20 +45,41 @@ public class ValidateReferencesRule implements EnforcerRule {
     private static final Set<Integer> RESPONSE_CODES_REDIRECT =
             Set.of(HttpURLConnection.HTTP_MOVED_PERM, HttpURLConnection.HTTP_MOVED_TEMP);
 
+    private static final int DEFAULT_MAX_FAILURES_PER_HOST = 3;
+
     private final Logger logger;
+    private final HttpUrlChecker urlChecker;
+    private final Map<String, Integer> failureCountByHost = new HashMap<>();
+    private final Map<URI, Integer> responseCodeCache = new HashMap<>();
 
-    @Parameter(defaultValue = "false")
-    private boolean failOnAuth;
+    /**
+     * Fail on 401 or 403 response codes.
+     */
+    private boolean failOnAuth = false;
 
-    @Parameter(defaultValue = "false")
-    private boolean failOnRedirect;
+    /**
+     * Fail on 301 or 302 response codes.
+     */
+    private boolean failOnRedirect = false;
 
-    @Parameter(defaultValue = "false")
-    private boolean failOnDependencyReferences;
+    /**
+     * Consider broken links in dependencies as errors instead of warnings.
+     */
+    private boolean failOnDependencyReferences = false;
+
+    /**
+     * Maximum IO errors per host
+     */
+    int maxFailuresPerHost = DEFAULT_MAX_FAILURES_PER_HOST;
 
     @Inject
     public ValidateReferencesRule(Logger logger) {
+        this(logger, new JreHttpUrlChecker(logger));
+    }
+
+    ValidateReferencesRule(Logger logger, HttpUrlChecker urlChecker) {
         this.logger = logger;
+        this.urlChecker = urlChecker;
     }
 
     @Override
@@ -83,7 +105,7 @@ public class ValidateReferencesRule implements EnforcerRule {
         }
     }
 
-    List<String> validateReferences(Component component) {
+    private List<String> validateReferences(Component component) {
         return component.getExternalReferences().stream()
                 .<String>mapMulti((ref, consumer) -> {
                     String errorMessage = validateReference(ref.getLocation());
@@ -100,33 +122,110 @@ public class ValidateReferencesRule implements EnforcerRule {
             URI uri = new URI(location);
             String scheme = uri.getScheme();
             if ("http".equals(scheme) || "https".equals(scheme)) {
-                int responseCode = checkHttpUrl(uri.toURL());
-                if (HttpURLConnection.HTTP_OK != responseCode
-                        && (failOnAuth || !RESPONSE_CODES_AUTH.contains(responseCode))
-                        && (failOnRedirect || !RESPONSE_CODES_REDIRECT.contains(responseCode))) {
-                    return "Broken external reference (" + responseCode + "): " + location;
+                URL url = uri.toURL();
+                // 1. Skip if error limit exceeded
+                Integer failureCount = failureCountByHost.get(url.getAuthority());
+                if (failureCount != null && failureCount >= maxFailuresPerHost) {
+                    logger.debug("Maximum IO errors reached for host: " + url.getAuthority());
+                    return null;
+                }
+                // 2. Check the URL
+                try {
+                    Integer responseCode = responseCodeCache.get(uri);
+                    if (responseCode == null) {
+                        responseCode = urlChecker.getResponseCode(url);
+                        responseCodeCache.put(uri, responseCode);
+                    } else {
+                        logger.debug("Using cached response for URL: " + url);
+                    }
+                    if (HttpURLConnection.HTTP_OK != responseCode
+                            && (failOnAuth || !RESPONSE_CODES_AUTH.contains(responseCode))
+                            && (failOnRedirect || !RESPONSE_CODES_REDIRECT.contains(responseCode))) {
+                        return "Broken external reference (" + responseCode + "): " + location;
+                    }
+                } catch (IOException e) {
+                    failureCountByHost.merge(url.getAuthority(), 1, Integer::sum);
+                    return "Failed to connect to URL: " + location;
                 }
             }
+            return null;
         } catch (URISyntaxException | MalformedURLException e) {
-            return "Reference location is not an URI: " + location;
-        } catch (IOException e) {
-            return "Failed to connect to URL: " + location;
+            return "Reference location is not a valid URI: " + location;
         }
-        return null;
     }
 
-    static int checkHttpUrl(URL url) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        try {
-            connection.setRequestMethod("HEAD");
-            connection.setInstanceFollowRedirects(false);
-            connection.setDoInput(true);
-            connection.setDoOutput(false);
-            connection.setUseCaches(false);
-            connection.connect();
-            return connection.getResponseCode();
-        } finally {
-            connection.disconnect();
+    public void setFailOnAuth(boolean failOnAuth) {
+        this.failOnAuth = failOnAuth;
+    }
+
+    public void setFailOnRedirect(boolean failOnRedirect) {
+        this.failOnRedirect = failOnRedirect;
+    }
+
+    public void setFailOnDependencyReferences(boolean failOnDependencyReferences) {
+        this.failOnDependencyReferences = failOnDependencyReferences;
+    }
+
+    /**
+     * Timeout in milliseconds for HTTP/HTTPS requests
+     */
+    public void setTimeoutMs(int timeoutMs) {
+        this.urlChecker.setTimeoutMs(timeoutMs);
+    }
+
+    public void setMaxFailuresPerHost(int maxFailuresPerHost) {
+        this.maxFailuresPerHost = maxFailuresPerHost;
+    }
+
+    interface HttpUrlChecker {
+
+        /**
+         * Checks the given URL and returns the response code.
+         *
+         * @param url A URL
+         * @return An HTTP Response code
+         * @throws IOException if a connection error occurs.
+         */
+        int getResponseCode(URL url) throws IOException;
+
+        void setTimeoutMs(int timeoutMs);
+    }
+
+    static class JreHttpUrlChecker implements HttpUrlChecker {
+
+        /**
+         * HTTP connection and read timeout in milliseconds.
+         */
+        private int timeoutMs = 5000;
+
+        private final Logger logger;
+
+        JreHttpUrlChecker(Logger logger) {
+            this.logger = logger;
+        }
+
+        @Override
+        public void setTimeoutMs(int timeoutMs) {
+            this.timeoutMs = timeoutMs;
+        }
+
+        @Override
+        public int getResponseCode(URL url) throws IOException {
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            try {
+                connection.setRequestMethod("HEAD");
+                connection.setInstanceFollowRedirects(false);
+                connection.setDoInput(true);
+                connection.setDoOutput(false);
+                connection.setUseCaches(false);
+                connection.setConnectTimeout(timeoutMs);
+                connection.setReadTimeout(timeoutMs);
+                logger.debug("Checking URL: " + url);
+                connection.connect();
+                return connection.getResponseCode();
+            } finally {
+                connection.disconnect();
+            }
         }
     }
 }
