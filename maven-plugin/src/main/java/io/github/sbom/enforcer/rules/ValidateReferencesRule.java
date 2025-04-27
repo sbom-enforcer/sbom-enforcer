@@ -154,27 +154,46 @@ public class ValidateReferencesRule implements EnforcerRule {
         }
     }
 
+    public boolean isFailOnAuth() {
+        return failOnAuth;
+    }
+
     public void setFailOnAuth(boolean failOnAuth) {
         this.failOnAuth = failOnAuth;
+    }
+
+    public boolean isFailOnRedirect() {
+        return failOnRedirect;
     }
 
     public void setFailOnRedirect(boolean failOnRedirect) {
         this.failOnRedirect = failOnRedirect;
     }
 
+    public boolean isFailOnDependencyReferences() {
+        return failOnDependencyReferences;
+    }
+
     public void setFailOnDependencyReferences(boolean failOnDependencyReferences) {
         this.failOnDependencyReferences = failOnDependencyReferences;
     }
 
-    /**
-     * Timeout in milliseconds for HTTP/HTTPS requests
-     */
-    public void setTimeoutMs(int timeoutMs) {
-        this.urlChecker.setTimeoutMs(timeoutMs);
+    public int getMaxFailuresPerHost() {
+        return maxFailuresPerHost;
     }
 
     public void setMaxFailuresPerHost(int maxFailuresPerHost) {
         this.maxFailuresPerHost = maxFailuresPerHost;
+    }
+
+    public int getTimeoutMs() {
+        return urlChecker.getTimeoutMs();
+    }
+    /**
+     * Timeout in milliseconds for HTTP/HTTPS requests
+     */
+    public void setTimeoutMs(int timeoutMs) {
+        urlChecker.setTimeoutMs(timeoutMs);
     }
 
     interface HttpUrlChecker {
@@ -187,6 +206,8 @@ public class ValidateReferencesRule implements EnforcerRule {
          * @throws IOException if a connection error occurs.
          */
         int getResponseCode(URL url) throws IOException;
+
+        int getTimeoutMs();
 
         void setTimeoutMs(int timeoutMs);
     }
@@ -202,6 +223,11 @@ public class ValidateReferencesRule implements EnforcerRule {
 
         JreHttpUrlChecker(Logger logger) {
             this.logger = logger;
+        }
+
+        @Override
+        public int getTimeoutMs() {
+            return timeoutMs;
         }
 
         @Override

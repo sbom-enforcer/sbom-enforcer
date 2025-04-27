@@ -26,6 +26,7 @@ import io.github.sbom.enforcer.BillOfMaterials;
 import io.github.sbom.enforcer.BomBuilderRequest;
 import io.github.sbom.enforcer.BomBuildingException;
 import io.github.sbom.enforcer.Component;
+import io.github.sbom.enforcer.internal.MojoUtils;
 import io.github.sbom.enforcer.support.DefaultBomBuilderRequest;
 import io.github.sbom.enforcer.support.DefaultComponent;
 import io.github.sbom.enforcer.support.DefaultExternalReference;
@@ -35,21 +36,11 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Stream;
-import org.codehaus.plexus.ContainerConfiguration;
-import org.codehaus.plexus.DefaultContainerConfiguration;
-import org.codehaus.plexus.DefaultPlexusContainer;
-import org.codehaus.plexus.PlexusConstants;
 import org.codehaus.plexus.PlexusContainer;
-import org.codehaus.plexus.PlexusContainerException;
-import org.codehaus.plexus.classworlds.ClassWorld;
-import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
-import org.eclipse.aether.repository.LocalRepository;
-import org.eclipse.aether.repository.LocalRepositoryManager;
-import org.eclipse.aether.spi.localrepo.LocalRepositoryManagerFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -66,7 +57,6 @@ class CycloneDxBomBuilderTest {
     @TempDir
     private static Path localRepositoryPath;
 
-    private static PlexusContainer container;
     private static RepositorySystem repoSystem;
     private static RepositorySystemSession repoSession;
 
@@ -78,30 +68,11 @@ class CycloneDxBomBuilderTest {
         }
     }
 
-    private static ContainerConfiguration setupContainerConfiguration() {
-        ClassWorld classWorld =
-                new ClassWorld("plexus.core", Thread.currentThread().getContextClassLoader());
-        return new DefaultContainerConfiguration()
-                .setClassWorld(classWorld)
-                .setClassPathScanning(PlexusConstants.SCANNING_INDEX)
-                .setAutoWiring(true)
-                .setName("maven");
-    }
-
-    private static PlexusContainer setupContainer() throws PlexusContainerException {
-        return new DefaultPlexusContainer(setupContainerConfiguration());
-    }
-
     @BeforeAll
     static void setup() throws Exception {
-        container = setupContainer();
+        PlexusContainer container = MojoUtils.setupContainer();
         repoSystem = container.lookup(RepositorySystem.class);
-        LocalRepositoryManagerFactory factory = container.lookup(LocalRepositoryManagerFactory.class, "simple");
-        DefaultRepositorySystemSession repoSession = new DefaultRepositorySystemSession();
-        LocalRepositoryManager manager =
-                factory.newInstance(repoSession, new LocalRepository(localRepositoryPath.toFile()));
-        repoSession.setLocalRepositoryManager(manager);
-        CycloneDxBomBuilderTest.repoSession = repoSession;
+        repoSession = MojoUtils.createRepositorySystemSession(container, localRepositoryPath);
     }
 
     @Test

@@ -57,6 +57,7 @@ and the SBOM Enforcer Maven Plugin to your build:
   </plugin>
 </plugins>
 ----
+
 <1> For the plugin configuration see the examples below:
 * <<checksum>>
 * <<validateReferences>>
@@ -67,16 +68,9 @@ and the SBOM Enforcer Maven Plugin to your build:
 Since the Maven local repository in `~/.m2/repository` is used both as a cache for dependencies downloaded from remote repositories and a staging area for published artifacts, it might happen that the dependencies it contains **differ** from the originals in Maven Central.
 To make sure your SBOM checksums are correct use this configuration:
 
-[source,xml,subs="+attributes"]
+[source,xml]
 ----
-<configuration>
-  <!-- Force dependency update to prevent corrupted Maven cache -->
-  <forceDependencyUpdate>true</forceDependencyUpdate>
-  <rules>
-    <!-- Verify that checksums in the SBOM correspond to the downloaded dependencies -->
-    <checksum/>
-  </rules>
-</configuration>
+include::examples/checksum.xml[tags=!license]
 ----
 
 [#validateReferences]
@@ -84,19 +78,7 @@ To make sure your SBOM checksums are correct use this configuration:
 
 To ensure that all the links included in the SBOM point to existing resources use:
 
-[source,xml,subs="+attributes"]
+[source,xml]
 ----
-<configuration>
-  <rules>
-    <!-- Verify links of external references -->
-    <validateReferences>
-      <!-- Don't fail on authentication or authorization errors -->
-      <failOnAuth>false</failOnAuth>
-      <!-- Warn instead of failing if external references of dependencies are broken -->
-      <failOnDependencyReferences>false</failOnDependencyReferences>
-      <!-- Fail on 30x redirects -->
-      <failOnRedirect>true</failOnRedirect>
-    </validateReferences>
-  </rules>
-</configuration>
+include::examples/validateReferences.xml[tags=!license]
 ----

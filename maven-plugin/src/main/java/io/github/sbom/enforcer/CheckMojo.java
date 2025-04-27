@@ -39,9 +39,9 @@ import org.codehaus.plexus.component.configurator.ComponentConfigurationExceptio
 import org.codehaus.plexus.component.configurator.ComponentConfigurator;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
+import org.codehaus.plexus.configuration.DefaultPlexusConfiguration;
 import org.codehaus.plexus.configuration.PlexusConfiguration;
 import org.eclipse.aether.AbstractForwardingRepositorySystemSession;
-import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.aether.repository.WorkspaceReader;
@@ -67,7 +67,7 @@ public class CheckMojo extends AbstractMojo {
      * Configuration of the rules to execute.
      */
     @Parameter
-    private PlexusConfiguration rules;
+    private PlexusConfiguration rules = new DefaultPlexusConfiguration("rules");
 
     /**
      * The current repository/network configuration of Maven.
@@ -96,11 +96,6 @@ public class CheckMojo extends AbstractMojo {
     private final ComponentConfigurator componentConfigurator;
 
     /**
-     * Component used to retrieve artifacts from Maven repositories.
-     */
-    private final RepositorySystem repoSystem;
-
-    /**
      * Builders for supported SBOM formats.
      */
     private final Set<BomBuilder> bomBuilders;
@@ -115,14 +110,12 @@ public class CheckMojo extends AbstractMojo {
             MavenProject project,
             MavenSession session,
             MojoExecution mojoExecution,
-            RepositorySystem repoSystem,
             @Named("basic") ComponentConfigurator componentConfigurator,
             Set<BomBuilder> bomBuilders,
             PlexusContainer container) {
         this.project = project;
         this.session = session;
         this.mojoExecution = mojoExecution;
-        this.repoSystem = repoSystem;
         this.componentConfigurator = componentConfigurator;
         this.bomBuilders = bomBuilders;
         this.container = container;
@@ -167,7 +160,8 @@ public class CheckMojo extends AbstractMojo {
         }
     }
 
-    private List<? extends EnforcerRule> createEnforcerRules() throws MojoExecutionException {
+    // package-private for testing
+    List<? extends EnforcerRule> createEnforcerRules() throws MojoExecutionException {
         ExpressionEvaluator evaluator = new PluginParameterExpressionEvaluator(session, mojoExecution);
 
         List<EnforcerRule> enforcerRules = new ArrayList<>();
@@ -188,6 +182,10 @@ public class CheckMojo extends AbstractMojo {
             }
         }
         return enforcerRules;
+    }
+
+    public void addRule(PlexusConfiguration rule) {
+        rules.addChild(rule);
     }
 
     private static class NoCacheRepositorySystemSession extends AbstractForwardingRepositorySystemSession {
