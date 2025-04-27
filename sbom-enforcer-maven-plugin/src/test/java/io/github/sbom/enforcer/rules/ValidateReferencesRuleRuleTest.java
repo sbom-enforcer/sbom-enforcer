@@ -93,7 +93,7 @@ public class ValidateReferencesRuleRuleTest {
 
     @Test
     @Timeout(2)
-    void urlChecker_whenNoSuchHost_timeoutOccurs() throws IOException {
+    void urlChecker_whenNoAnswer_timeoutOccurs() throws IOException {
         try (ServerSocketChannel serverSocketChannel = ServerSocketChannel.open()) {
             serverSocketChannel.bind(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0));
             InetSocketAddress localAddress = (InetSocketAddress) serverSocketChannel.getLocalAddress();
