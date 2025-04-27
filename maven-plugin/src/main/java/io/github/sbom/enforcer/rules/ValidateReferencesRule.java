@@ -63,9 +63,14 @@ public class ValidateReferencesRule implements EnforcerRule {
     private boolean failOnRedirect = false;
 
     /**
+     * Check references in dependencies
+     */
+    private boolean checkDependencies = true;
+
+    /**
      * Consider broken links in dependencies as errors instead of warnings.
      */
-    private boolean failOnDependencyReferences = false;
+    private boolean failOnDependencies = false;
 
     /**
      * Maximum IO errors per host
@@ -86,14 +91,16 @@ public class ValidateReferencesRule implements EnforcerRule {
     public void execute(BillOfMaterials bom) throws MojoFailureException {
         List<String> errors = new ArrayList<>(validateReferences(bom.getComponent()));
         List<String> dependencyErrors = new ArrayList<>();
-        for (Component dependency : bom.getDependencies()) {
-            dependencyErrors.addAll(validateReferences(dependency));
-        }
+        if (checkDependencies) {
+            for (Component dependency : bom.getDependencies()) {
+                dependencyErrors.addAll(validateReferences(dependency));
+            }
 
-        if (failOnDependencyReferences) {
-            errors.addAll(dependencyErrors);
-        } else {
-            dependencyErrors.stream().sorted().forEach(logger::warn);
+            if (failOnDependencies) {
+                errors.addAll(dependencyErrors);
+            } else {
+                dependencyErrors.stream().sorted().forEach(logger::warn);
+            }
         }
 
         if (!errors.isEmpty()) {
@@ -154,6 +161,14 @@ public class ValidateReferencesRule implements EnforcerRule {
         }
     }
 
+    public boolean isCheckDependencies() {
+        return checkDependencies;
+    }
+
+    public void setCheckDependencies(boolean checkDependencies) {
+        this.checkDependencies = checkDependencies;
+    }
+
     public boolean isFailOnAuth() {
         return failOnAuth;
     }
@@ -170,12 +185,12 @@ public class ValidateReferencesRule implements EnforcerRule {
         this.failOnRedirect = failOnRedirect;
     }
 
-    public boolean isFailOnDependencyReferences() {
-        return failOnDependencyReferences;
+    public boolean isFailOnDependencies() {
+        return failOnDependencies;
     }
 
-    public void setFailOnDependencyReferences(boolean failOnDependencyReferences) {
-        this.failOnDependencyReferences = failOnDependencyReferences;
+    public void setFailOnDependencies(boolean failOnDependencies) {
+        this.failOnDependencies = failOnDependencies;
     }
 
     public int getMaxFailuresPerHost() {

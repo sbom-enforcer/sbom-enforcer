@@ -19,16 +19,18 @@
   <rules>
     <!-- Verify links of external references -->
     <validateReferences>
-      <!-- Don't fail on authentication or authorization errors -->
-      <failOnAuth>true</failOnAuth>
+      <!-- Check also links in dependency components -->
+      <checkDependencies>true</checkDependencies>
       <!-- Warn instead of failing if external references of dependencies are broken -->
-      <failOnDependencyReferences>true</failOnDependencyReferences>
+      <failOnDependencies>false</failOnDependencies>
+      <!-- Don't fail on authentication or authorization errors -->
+      <failOnAuth>false</failOnAuth>
       <!-- Fail on 30x redirects -->
-      <failOnRedirect>true</failOnRedirect>
+      <failOnRedirect>false</failOnRedirect>
       <!-- Maximum number of I/O errors per HTTP host -->
-      <maxFailuresPerHost>5</maxFailuresPerHost>
+      <maxFailuresPerHost>3</maxFailuresPerHost>
       <!-- Timeout for the HTTP requests in ms -->
-      <timeoutMs>1000</timeoutMs>
+      <timeoutMs>5000</timeoutMs>
     </validateReferences>
   </rules>
 </configuration>

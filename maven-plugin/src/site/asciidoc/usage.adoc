@@ -82,3 +82,6 @@ To ensure that all the links included in the SBOM point to existing resources us
 ----
 include::examples/validateReferences.xml[tags=!license]
 ----
+
+All the configuration attributes are optional.
+The values above are the default values.

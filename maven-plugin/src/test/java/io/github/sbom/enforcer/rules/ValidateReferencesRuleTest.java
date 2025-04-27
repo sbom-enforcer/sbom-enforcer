@@ -18,7 +18,9 @@ package io.github.sbom.enforcer.rules;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -201,20 +203,36 @@ class ValidateReferencesRuleTest {
         verify(urlChecker, times(1)).getResponseCode(URL_301);
     }
 
+    static Stream<Arguments> failOnDependencies() {
+        return Stream.of(
+                // Dependencies disabled
+                Arguments.of(false, false),
+                // Check, but don't fail
+                Arguments.of(true, false),
+                // Check and fail
+                Arguments.of(true, true));
+    }
+
     @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void failOnDependencyReferences(boolean failOnDependencyReferences) throws IOException {
+    @MethodSource
+    void failOnDependencies(boolean checkDependencies, boolean failOnDependencies) throws IOException {
         HttpUrlChecker urlChecker = createMockHttpUrlChecker();
         Logger logger = mock(Logger.class);
         ValidateReferencesRule rule = new ValidateReferencesRule(logger, urlChecker);
-        rule.setFailOnDependencyReferences(failOnDependencyReferences);
+        rule.setCheckDependencies(checkDependencies);
+        rule.setFailOnDependencies(failOnDependencies);
         // Create BOM
         BillOfMaterials bom = createMockBillOfMaterials(Map.of(), Map.of("website", URL_EXCEPTION.toExternalForm()));
 
-        if (failOnDependencyReferences) {
+        if (checkDependencies && failOnDependencies) {
             assertThatThrownBy(() -> rule.execute(bom)).isInstanceOf(MojoFailureException.class);
         } else {
             assertDoesNotThrow(() -> rule.execute(bom));
+        }
+        if (checkDependencies) {
+            verify(urlChecker, times(1)).getResponseCode(URL_EXCEPTION);
+        } else {
+            verify(urlChecker, never()).getResponseCode(any());
         }
     }
 

@@ -71,7 +71,7 @@
               <rules>
                 <validateReferences>
                   <failOnAuth>true</failOnAuth>
-                  <failOnDependencyReferences>true</failOnDependencyReferences>
+                  <failOnDependencies>true</failOnDependencies>
                   <failOnRedirect>true</failOnRedirect>
                 </validateReferences>
               </rules>
