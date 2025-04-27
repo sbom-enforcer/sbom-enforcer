@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@Export
 @NullMarked
+@Version("0.2.0")
 package io.github.sbom.enforcer.rules;
 
 import org.jspecify.annotations.NullMarked;
+import org.osgi.annotation.bundle.Export;
+import org.osgi.annotation.versioning.Version;
