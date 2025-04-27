@@ -51,7 +51,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-public class ValidateReferencesRuleRuleTest {
+class ValidateReferencesRuleTest {
 
     private static final URL URL_200;
     private static final URL URL_301;
