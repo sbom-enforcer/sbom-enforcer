@@ -138,12 +138,7 @@ public class ValidateReferencesRule implements EnforcerRule {
 
     private boolean shouldCheck(ExternalReference externalReference) {
         String referenceType = externalReference.getReferenceType();
-        if (!includes.isEmpty()) {
-            if (!includes.contains(referenceType)) {
-                return false;
-            }
-        }
-        return !excludes.contains(referenceType);
+        return (includes.isEmpty() || includes.contains(referenceType)) && !excludes.contains(referenceType);
     }
 
     @Nullable
