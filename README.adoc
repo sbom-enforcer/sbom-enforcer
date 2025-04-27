@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 ////
+image::https://codecov.io/gh/sbom-enforcer/sbom-enforcer/graph/badge.svg?token=B7X35ZAM2W[https://codecov.io/gh/sbom-enforcer/sbom-enforcer]
+
 == SBOM Enforcer Maven Plugin
 
 The SBOM Enforcer Maven Plugin allows you to perform multiple quality checks on CycloneDX SBOMs.
