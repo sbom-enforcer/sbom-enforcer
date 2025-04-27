@@ -116,9 +116,6 @@ public class CheckMojo extends AbstractMojo {
         this.project = project;
         this.session = session;
         this.mojoExecution = mojoExecution;
-        /*
-         * Component used to retrieve artifacts from Maven repositories.
-         */
         this.componentConfigurator = componentConfigurator;
         this.bomBuilders = bomBuilders;
         this.container = container;
