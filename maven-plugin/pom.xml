@@ -226,6 +226,7 @@
               <cloneProjectsTo>${project.build.directory}/its</cloneProjectsTo>
               <localRepositoryPath>${project.build.directory}/it-repo</localRepositoryPath>
               <postBuildHookScript>verify</postBuildHookScript>
+              <mavenOpts>@{jacoco.command}</mavenOpts>
             </configuration>
           </execution>
         </executions>
