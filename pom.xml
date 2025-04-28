@@ -144,6 +144,7 @@
     <osgi-annotation-bundle.version>2.0.0</osgi-annotation-bundle.version>
     <osgi-annotation-versioning.version>1.1.2</osgi-annotation-versioning.version>
     <slf4j.version>2.0.17</slf4j.version>
+    <spotbugs-annotations.version>4.9.3</spotbugs-annotations.version>
     <!--
       ~ Dependencies provided by Maven.
       ~
@@ -268,6 +269,12 @@
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-nop</artifactId>
         <version>${slf4j.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-annotations</artifactId>
+        <version>${spotbugs-annotations.version}</version>
       </dependency>
 
       <dependency>

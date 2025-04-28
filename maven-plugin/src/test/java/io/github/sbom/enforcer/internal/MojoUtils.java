@@ -29,6 +29,7 @@ import org.eclipse.aether.RepositoryException;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.repository.LocalRepository;
 import org.eclipse.aether.repository.LocalRepositoryManager;
+import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.aether.spi.localrepo.LocalRepositoryManagerFactory;
 
 public final class MojoUtils {
@@ -54,6 +55,9 @@ public final class MojoUtils {
         LocalRepositoryManager manager =
                 factory.newInstance(repoSession, new LocalRepository(localRepositoryPath.toFile()));
         repoSession.setLocalRepositoryManager(manager);
+        // Default policies
+        repoSession.setUpdatePolicy(RepositoryPolicy.UPDATE_POLICY_DAILY);
+        repoSession.setChecksumPolicy(RepositoryPolicy.CHECKSUM_POLICY_WARN);
         return repoSession;
     }
 

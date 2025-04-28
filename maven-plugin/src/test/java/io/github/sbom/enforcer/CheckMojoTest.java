@@ -25,14 +25,20 @@ import io.github.sbom.enforcer.rules.ValidateReferencesRule;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Stream;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.DefaultArtifact;
+import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.execution.MavenSession;
@@ -40,6 +46,7 @@ import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.descriptor.MojoDescriptor;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
+import org.apache.maven.project.MavenProject;
 import org.assertj.core.api.Assertions;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.configurator.ComponentConfigurator;
@@ -50,17 +57,22 @@ import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.codehaus.plexus.util.xml.Xpp3DomBuilder;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.spi.localrepo.LocalRepositoryManagerFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class CheckMojoTest {
 
     @TempDir
     private static Path localRepositoryPath;
+
+    @TempDir
+    private static Path altLocalRepositoryPath;
 
     private static PlexusContainer container;
     private static RepositorySystemSession repoSession;
@@ -93,12 +105,26 @@ class CheckMojoTest {
     }
 
     private static CheckMojo createCheckMojo() throws ComponentLookupException {
-        ComponentConfigurator configurator = container.lookup(ComponentConfigurator.class, "basic");
+        return createCheckMojo(new MavenProject());
+    }
+
+    private static CheckMojo createCheckMojo(MavenProject project) throws ComponentLookupException {
+        // Maven Session
         MavenExecutionRequest request = createMavenExecutionRequest();
         MavenExecutionResult result = mock(MavenExecutionResult.class);
         MavenSession session = createMavenSession(request, result);
+        // Mojo execution
         MojoExecution mojoExecution = new MojoExecution(createMojoDescriptor());
-        return new CheckMojo(null, session, mojoExecution, configurator, Set.of(), container);
+        // Configurator
+        ComponentConfigurator configurator = container.lookup(ComponentConfigurator.class, "basic");
+        // Bom builders
+        Set<BomBuilder> bomBuilders = Set.copyOf(container.lookupList(BomBuilder.class));
+        LocalRepositoryManagerFactory localRepositoryManagerFactory =
+                container.lookup(LocalRepositoryManagerFactory.class);
+        CheckMojo mojo = new CheckMojo(
+                project, session, mojoExecution, configurator, bomBuilders, container, localRepositoryManagerFactory);
+        mojo.setRepoSession(repoSession);
+        return mojo;
     }
 
     private static PlexusConfiguration fromString(String configuration) {
@@ -232,5 +258,46 @@ class CheckMojoTest {
         Assertions.assertThatThrownBy(mojo::createEnforcerRules)
                 .isInstanceOf(MojoExecutionException.class)
                 .hasMessageContaining(errorMessage);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void singleDependencyProject(boolean usePrivateLocalRepo) throws Exception {
+        // Artifact
+        Path mockArtifactPath = getResourcePath("mock-artifact.txt");
+        Artifact artifact = new DefaultArtifact(
+                "org.apache.logging.log4j",
+                "log4j-core",
+                "2.24.3",
+                "compile",
+                "jar",
+                null,
+                new DefaultArtifactHandler("jar"));
+        artifact.setFile(mockArtifactPath.toFile());
+        // Bom
+        Path bomPath = getResourcePath("single-dep-cyclonedx.xml");
+        Artifact bomArtifact = new DefaultArtifact(
+                "org.apache.logging.log4j",
+                "log4j-core",
+                "2.24.3",
+                "compile",
+                "xml",
+                "cyclonedx",
+                new DefaultArtifactHandler("xml"));
+        bomArtifact.setFile(bomPath.toFile());
+        // Maven project
+        MavenProject project = new MavenProject();
+        project.setArtifact(artifact);
+        project.addAttachedArtifact(bomArtifact);
+
+        CheckMojo mojo = createCheckMojo(project);
+        mojo.setUsePrivateLocalRepo(usePrivateLocalRepo);
+        mojo.setPrivateLocalRepoPath(altLocalRepositoryPath);
+        mojo.execute();
+    }
+
+    private Path getResourcePath(String resource) throws URISyntaxException {
+        URL url = Objects.requireNonNull(CheckMojoTest.class.getClassLoader().getResource(resource));
+        return Paths.get(url.toURI());
     }
 }

@@ -110,12 +110,12 @@ public class CycloneDxBomBuilder implements BomBuilder {
     private Component createDependency(RepositorySystemSession repoSession, org.cyclonedx.model.Component cdxComponent)
             throws BomBuildingException {
         Artifact artifact = CycloneDxUtils.toArtifact(cdxComponent);
-        RemoteRepository remoteRepository = Artifacts.getRemoteRepository(artifact);
+        RemoteRepository remoteRepository = Artifacts.getRemoteRepository(artifact, repoSession);
         try {
             artifact = Artifacts.downloadArtifact(repoSystem, repoSession, artifact, remoteRepository);
         } catch (ArtifactResolutionException e) {
-            // This usually happens for "aggregate" SBOMs and artifacts from the
-            logger.warn("Failed to download artifact " + artifact, e);
+            // This usually happens for "aggregate" SBOMs and artifacts from the reactor that were not built yet.
+            logger.warn("Failed to download artifact " + artifact);
         }
         DefaultComponent.Builder builder = DefaultComponent.newBuilder().setArtifact(artifact);
         processGenericComponent(builder, cdxComponent);

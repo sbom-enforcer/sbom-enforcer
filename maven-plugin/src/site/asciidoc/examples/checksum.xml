@@ -16,8 +16,8 @@
   ~
   ~ end::license[] -->
 <configuration>
-  <!-- Force dependency update to prevent corrupted Maven cache -->
-  <forceDependencyUpdate>true</forceDependencyUpdate>
+  <!-- Use a private local repository to prevent the usage of locally installed artifacts -->
+  <usePrivateLocalRepo>true</usePrivateLocalRepo>
   <rules>
     <!-- Verify that checksums in the SBOM correspond to the downloaded dependencies -->
     <checksum/>
