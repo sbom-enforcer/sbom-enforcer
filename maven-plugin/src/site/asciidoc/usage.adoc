@@ -70,7 +70,7 @@ To make sure your SBOM checksums are correct use this configuration:
 
 [source,xml]
 ----
-include::examples/checksum.xml[tags=!license]
+include::./examples/checksum.xml[tags=!license]
 ----
 
 [#validateReferences]
@@ -80,7 +80,7 @@ To ensure that all the links included in the SBOM point to existing resources us
 
 [source,xml]
 ----
-include::examples/validateReferences.xml[tags=!license]
+include::./examples/validateReferences.xml[tags=!license]
 ----
 
 All the configuration attributes are optional.
