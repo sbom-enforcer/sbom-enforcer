@@ -43,6 +43,9 @@
 
     <!-- Site attributes -->
     <project-version>${project.version}</project-version>
+
+    <!-- the CycloneDX Maven Plugin does not recognize the new Central Publisher -->
+    <cyclonedx.skipNotDeployed>false</cyclonedx.skipNotDeployed>
   </properties>
 
   <dependencies>
