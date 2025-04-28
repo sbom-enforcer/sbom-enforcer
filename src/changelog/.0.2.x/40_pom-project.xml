@@ -5,5 +5,6 @@
        xsi:schemaLocation="https://logging.apache.org/xml/ns https://logging.apache.org/xml/ns/log4j-changelog-0.xsd"
        type="fixed">
   <issue id="40" link="https://github.com/sbom-enforcer/sbom-enforcer/issues/40"/>
+  <issue id="57" link="https://github.com/sbom-enforcer/sbom-enforcer/issues/40"/>
   <description format="asciidoc">Handle modules with packaging `pom`.</description>
 </entry>

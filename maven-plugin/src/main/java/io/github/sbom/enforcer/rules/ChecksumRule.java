@@ -55,6 +55,10 @@ public class ChecksumRule implements EnforcerRule {
     }
 
     private static List<String> validateChecksums(Component component) {
+        // If there are no checksums, there is nothing to validate
+        if (component.getChecksums().isEmpty()) {
+            return List.of();
+        }
         File file = component.getArtifact().getFile();
         if (file == null || !file.exists()) {
             return List.of("Missing file for artifact: " + component.getArtifact());
@@ -69,7 +73,7 @@ public class ChecksumRule implements EnforcerRule {
                 .toList();
     }
 
-    private static @Nullable String validateChecksum(ChecksumAlgorithm algorithm, String expectedValue, File file) {
+    static @Nullable String validateChecksum(ChecksumAlgorithm algorithm, String expectedValue, File file) {
         try {
             MessageDigest digest = DigestUtils.getDigest(algorithm.toJce());
             String computedValue = Hex.encodeHexString(DigestUtils.digest(digest, file));
@@ -81,7 +85,7 @@ public class ChecksumRule implements EnforcerRule {
             return "Failed to calculate checksum for file " + file.getName() + ": algorithm " + algorithm.toJce()
                     + " is not supported.";
         } catch (IOException e) {
-            return "Failed to calculate checksum for file " + file.getName() + ": " + e.getMessage();
+            return "Failed to calculate checksum for file " + file.getName() + ": " + e;
         }
         return null;
     }

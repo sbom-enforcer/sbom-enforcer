@@ -34,6 +34,7 @@ import java.util.Collection;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import org.codehaus.plexus.logging.Logger;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Hash;
@@ -53,10 +54,12 @@ import org.eclipse.aether.resolution.ArtifactResolutionException;
 public class CycloneDxBomBuilder implements BomBuilder {
 
     private final RepositorySystem repoSystem;
+    private final Logger logger;
 
     @Inject
-    public CycloneDxBomBuilder(RepositorySystem repoSystem) {
+    public CycloneDxBomBuilder(RepositorySystem repoSystem, Logger logger) {
         this.repoSystem = repoSystem;
+        this.logger = logger;
     }
 
     @Override
@@ -112,7 +115,8 @@ public class CycloneDxBomBuilder implements BomBuilder {
         try {
             artifact = Artifacts.downloadArtifact(repoSystem, repoSession, artifact, remoteRepository);
         } catch (ArtifactResolutionException e) {
-            throw new BomBuildingException("Failed to download artifact " + artifact, e);
+            // This usually happens for "aggregate" SBOMs and artifacts from the
+            logger.warn("Failed to download artifact " + artifact, e);
         }
         DefaultComponent.Builder builder = DefaultComponent.newBuilder().setArtifact(artifact);
         processGenericComponent(builder, cdxComponent);

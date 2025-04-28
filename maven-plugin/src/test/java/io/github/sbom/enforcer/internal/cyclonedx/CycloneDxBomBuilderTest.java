@@ -19,6 +19,7 @@ import static io.github.sbom.enforcer.internal.Artifacts.withClassifier;
 import static io.github.sbom.enforcer.internal.Artifacts.withExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
 
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
@@ -37,6 +38,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Stream;
 import org.codehaus.plexus.PlexusContainer;
+import org.codehaus.plexus.logging.Logger;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.Artifact;
@@ -77,7 +79,7 @@ class CycloneDxBomBuilderTest {
 
     @Test
     void createSingleDepBom() throws Exception {
-        CycloneDxBomBuilder builder = new CycloneDxBomBuilder(repoSystem);
+        CycloneDxBomBuilder builder = new CycloneDxBomBuilder(repoSystem, mock(Logger.class));
         BomBuilderRequest request = createRequest("single-dep-cyclonedx.xml");
         BillOfMaterials bom = builder.build(repoSession, request);
         assertThat(bom).isNotNull();
@@ -109,7 +111,7 @@ class CycloneDxBomBuilderTest {
 
     @Test
     void createNoDepBom() throws Exception {
-        CycloneDxBomBuilder builder = new CycloneDxBomBuilder(repoSystem);
+        CycloneDxBomBuilder builder = new CycloneDxBomBuilder(repoSystem, mock(Logger.class));
         BomBuilderRequest request = createRequest("no-dep-cyclonedx.xml");
         BillOfMaterials bom = builder.build(repoSession, request);
         assertThat(bom).isNotNull();
@@ -125,7 +127,7 @@ class CycloneDxBomBuilderTest {
 
     @Test
     void createEmptyBom() throws Exception {
-        CycloneDxBomBuilder builder = new CycloneDxBomBuilder(repoSystem);
+        CycloneDxBomBuilder builder = new CycloneDxBomBuilder(repoSystem, mock(Logger.class));
         BomBuilderRequest request = createRequest("empty-cyclonedx.xml");
         assertThatThrownBy(() -> builder.build(repoSession, request)).isInstanceOf(BomBuildingException.class);
     }
