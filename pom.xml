@@ -92,14 +92,14 @@
   <properties>
     <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <revision>0.2.0-SNAPSHOT</revision>
+    <revision>0.2.0</revision>
 
     <!-- `bnd-maven-plugin` 7.x requires a Maven version `3.8.1` or higher -->
     <javaBuildVersion>17</javaBuildVersion>
     <minimalMavenBuildVersion>3.8.1</minimalMavenBuildVersion>
 
     <!-- Enable reproducible builds -->
-    <project.build.outputTimestamp>2025-04-13T14:18:46Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2025-04-28T16:59:43Z</project.build.outputTimestamp>
 
     <!-- Disable maven-site-plugin deploy -->
     <maven.site.deploy.skip>true</maven.site.deploy.skip>
