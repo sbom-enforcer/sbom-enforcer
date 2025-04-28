@@ -1,0 +1,87 @@
+////
+// Copyright © 2025 Christian Grobmeier, Piotr P. Karwasz
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+////
+= Usage
+
+[#installation]
+== Installation
+
+This plugin by default analyzes the SBOM artifact attached to the build.
+To use it, add both the
+https://cyclonedx.github.io/cyclonedx-maven-plugin/[CycloneDX Maven Plugin]
+and the SBOM Enforcer Maven Plugin to your build:
+
+[source,xml,subs="+attributes"]
+----
+<plugins>
+  <!-- Create SBOM using the CycloneDX Maven Plugin -->
+  <plugin>
+    <groupId>org.cyclonedx</groupId>
+    <artifactId>cyclonedx-maven-plugin</artifactId>
+    <version>{cyclonedx-maven-plugin-version}</version>
+    <executions>
+      <id>make-sbom</id>
+      <goals>
+        <goal>makeBom</goal>
+      </goals>
+    </executions>
+  </plugin>
+
+  <!-- Enforce quality of SBOM -->
+  <plugin>
+    <groupId>io.github.sbom-enforcer</groupId>
+    <artifactId>sbom-enforcer-maven-plugin</artifactId>
+    <version>{project-version}</version>
+    <executions>
+      <id>check-sbom</id>
+      <goals>
+        <goal>check</goal>
+      </goals>
+      <configuration>
+        <!--1-->
+        <!-- Plugin configuration goes here -->
+      </configuration>
+    </executions>
+  </plugin>
+</plugins>
+----
+
+<1> For the plugin configuration see the examples below:
+* <<checksum>>
+* <<validateReferences>>
+
+[#checksum]
+== Verify dependency checksums
+
+Since the Maven local repository in `~/.m2/repository` is used both as a cache for dependencies downloaded from remote repositories and a staging area for published artifacts, it might happen that the dependencies it contains **differ** from the originals in Maven Central.
+To make sure your SBOM checksums are correct use this configuration:
+
+[source,xml]
+----
+include::examples/checksum.xml[tags=!license]
+----
+
+[#validateReferences]
+== Verify links to external references
+
+To ensure that all the links included in the SBOM point to existing resources use:
+
+[source,xml]
+----
+include::examples/validateReferences.xml[tags=!license]
+----
+
+All the configuration attributes are optional.
+The values above are the default values.

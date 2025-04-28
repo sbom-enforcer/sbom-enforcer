@@ -57,7 +57,7 @@
   </developers>
 
   <modules>
-    <module>sbom-enforcer-maven-plugin</module>
+    <module>maven-plugin</module>
   </modules>
 
   <scm child.scm.connection.inherit.append.path="false" child.scm.developerConnection.inherit.append.path="false" child.scm.url.inherit.append.path="false">
@@ -92,50 +92,50 @@
   <properties>
     <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <revision>0.1.0</revision>
+    <revision>0.2.0</revision>
 
     <!-- `bnd-maven-plugin` 7.x requires a Maven version `3.8.1` or higher -->
     <javaBuildVersion>17</javaBuildVersion>
     <minimalMavenBuildVersion>3.8.1</minimalMavenBuildVersion>
 
     <!-- Enable reproducible builds -->
-    <project.build.outputTimestamp>2025-04-13T14:18:46Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2025-04-28T16:59:43Z</project.build.outputTimestamp>
 
     <!-- Disable maven-site-plugin deploy -->
     <maven.site.deploy.skip>true</maven.site.deploy.skip>
 
     <!-- Maven plugin dependencies -->
-    <error_prone.version>2.32.0</error_prone.version>
-    <findsecbugs-plugin.version>1.13.0</findsecbugs-plugin.version>
-    <palantir-java-format.version>2.50.0</palantir-java-format.version>
+    <error_prone.version>2.38.0</error_prone.version>
+    <findsecbugs-plugin.version>1.14.0</findsecbugs-plugin.version>
+    <palantir-java-format.version>2.63.0</palantir-java-format.version>
 
     <!-- Maven plugin versions -->
     <apache-jar-resource-bundle.version>1.5</apache-jar-resource-bundle.version>
     <apache-rat-plugin.version>0.16.1</apache-rat-plugin.version>
-    <bnd-baseline-maven-plugin.version>7.0.0</bnd-baseline-maven-plugin.version>
+    <bnd-baseline-maven-plugin.version>7.1.0</bnd-baseline-maven-plugin.version>
     <build-helper-maven-plugin.version>3.6.0</build-helper-maven-plugin.version>
     <central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
     <commons-codec.version>1.18.0</commons-codec.version>
-    <cyclonedx-maven-plugin.version>2.8.1</cyclonedx-maven-plugin.version>
-    <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>
-    <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
+    <cyclonedx-maven-plugin.version>2.9.1</cyclonedx-maven-plugin.version>
+    <flatten-maven-plugin.version>1.7.0</flatten-maven-plugin.version>
+    <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
     <log4j-changelog-maven-plugin.version>0.9.0</log4j-changelog-maven-plugin.version>
     <maven-artifact-plugin.version>3.6.0</maven-artifact-plugin.version>
     <maven-clean-plugin.version>3.4.1</maven-clean-plugin.version>
-    <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+    <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
     <maven-deploy-plugin.version>3.1.4</maven-deploy-plugin.version>
     <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
     <maven-gpg-plugin.version>3.2.7</maven-gpg-plugin.version>
-    <maven-install-plugin.version>3.1.3</maven-install-plugin.version>
+    <maven-install-plugin.version>3.1.4</maven-install-plugin.version>
     <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
     <maven-javadoc-plugin.version>3.11.2</maven-javadoc-plugin.version>
     <maven-plugin-plugin.version>3.15.1</maven-plugin-plugin.version>
     <maven-remote-resources-plugin.version>3.3.0</maven-remote-resources-plugin.version>
     <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
     <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
-    <maven-surefire-plugin.version>3.5.0</maven-surefire-plugin.version>
-    <spotbugs-maven-plugin.version>4.8.6.6</spotbugs-maven-plugin.version>
-    <spotless-maven-plugin.version>2.43.0</spotless-maven-plugin.version>
+    <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
+    <spotbugs-maven-plugin.version>4.9.3.0</spotbugs-maven-plugin.version>
+    <spotless-maven-plugin.version>2.44.4</spotless-maven-plugin.version>
 
     <!-- Dependency versions -->
     <assertj.version>3.27.3</assertj.version>
@@ -143,7 +143,8 @@
     <maven-plugin-annotations.version>3.15.1</maven-plugin-annotations.version>
     <osgi-annotation-bundle.version>2.0.0</osgi-annotation-bundle.version>
     <osgi-annotation-versioning.version>1.1.2</osgi-annotation-versioning.version>
-    <slf4j.version>2.0.16</slf4j.version>
+    <slf4j.version>2.0.17</slf4j.version>
+    <spotbugs-annotations.version>4.9.3</spotbugs-annotations.version>
     <!--
       ~ Dependencies provided by Maven.
       ~
@@ -152,7 +153,7 @@
     <maven.version>3.9.9</maven.version>
     <maven-resolver.version>1.9.22</maven-resolver.version>
     <!-- Pinned transitive versions -->
-    <jackson.version>2.18.3</jackson.version>
+    <jackson.version>2.19.0</jackson.version>
 
     <!-- Dummy version will be updated by parse-version mojo -->
     <parsedVersion.majorVersion />
@@ -271,6 +272,12 @@
       </dependency>
 
       <dependency>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-annotations</artifactId>
+        <version>${spotbugs-annotations.version}</version>
+      </dependency>
+
+      <dependency>
         <groupId>com.fasterxml.jackson</groupId>
         <artifactId>jackson-bom</artifactId>
         <version>${jackson.version}</version>
@@ -281,7 +288,15 @@
       <dependency>
         <groupId>org.junit</groupId>
         <artifactId>junit-bom</artifactId>
-        <version>5.11.4</version>
+        <version>5.12.2</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-bom</artifactId>
+        <version>5.17.0</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -509,6 +524,9 @@
             <goals>
               <goal>prepare-agent</goal>
             </goals>
+            <configuration>
+              <propertyName>jacoco.command</propertyName>
+            </configuration>
           </execution>
           <execution>
             <id>report-test-coverage</id>
@@ -532,6 +550,7 @@
             <arg>-Xlint:all</arg>
             <arg>-XDcompilePolicy=simple</arg>
             <arg>-Xplugin:ErrorProne</arg>
+            <arg>--should-stop=ifError=FLOW</arg>
           </compilerArgs>
           <annotationProcessorPaths>
             <path>
@@ -624,6 +643,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
+          <argLine>@{jacoco.command}</argLine>
           <!-- Using module path while running tests causes `IllegalAccess` exceptions.
                We relax that constraint for tests and use class path there. -->
           <useModulePath>false</useModulePath>
@@ -734,7 +754,7 @@
             <configuration>
               <locales>default</locales>
               <attributes>
-                <cyclonedx-version>2.9.1</cyclonedx-version>
+                <cyclonedx-version>${cyclonedx-maven-plugin.version}</cyclonedx-version>
                 <project-version>${project.version}</project-version>
               </attributes>
             </configuration>
@@ -766,9 +786,13 @@
 
   <profiles>
 
+    <!--
+      ~ Profile active for all JARs that will be published to Maven Central.
+      ~ POMs are not published.
+      -->
     <profile>
 
-      <id>flatten-jar-pom</id>
+      <id>published-module</id>
 
       <activation>
         <file>
@@ -802,8 +826,22 @@
               </execution>
             </executions>
           </plugin>
+
+          <plugin>
+            <groupId>biz.aQute.bnd</groupId>
+            <artifactId>bnd-baseline-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>check-compatibility</id>
+                <goals>
+                  <goal>baseline</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
         </plugins>
       </build>
+
     </profile>
 
     <profile>

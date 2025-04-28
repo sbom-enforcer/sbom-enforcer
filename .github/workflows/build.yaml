@@ -22,8 +22,7 @@ on:
       - "main"
   pull_request: { }
 
-permissions:
-  contents: read
+permissions: { }
 
 jobs:
 
@@ -39,10 +38,10 @@ jobs:
     steps:
 
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683   # 4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # 4.2.2
 
       - name: Setup Java
-        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00   # 4.7.1
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # 4.7.1
         with:
           distribution: temurin
           java-version: 21
@@ -60,7 +59,7 @@ jobs:
           echo MIMIR_PATH="$MIMIR_PATH" >> $GITHUB_ENV
 
       - name: Setup Mimir Cache
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684   # 4.2.3
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # 4.2.3
         with:
           # Mimir contains an exact copy of part of Maven Central.
           # Therefore, we only need to clean it from time to time to remove old versions.
@@ -80,8 +79,14 @@ jobs:
       # We upload tests results.
       - name: Upload test reports
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02   # 4.6.2
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # 4.6.2
         with:
           name: "test-report-${{matrix.os}}-${{github.run_number}}-${{github.run_attempt}}"
           path: |
             **/target/surefire-reports
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@ad3126e916f78f00edff4ed0317cf185271ccc2d # 5.4.2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: sbom-enforcer/sbom-enforcer

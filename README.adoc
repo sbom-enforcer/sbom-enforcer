@@ -13,7 +13,48 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 ////
-== SBOM Enforcer Maven Plugin
+= SBOM Enforcer Maven Plugin
 
-The SBOM Enforcer Maven Plugin allows you to perform multiple quality checks on CycloneDX SBOMs.
-Support for the SPDX format is in progress.
+image:https://img.shields.io/github/license/sbom-enforcer/sbom-enforcer[GitHub License]
+image:https://img.shields.io/github/actions/workflow/status/sbom-enforcer/sbom-enforcer/build.yaml[GitHub Actions Workflow Status]
+image:https://codecov.io/gh/sbom-enforcer/sbom-enforcer/graph/badge.svg?token=B7X35ZAM2W[Codecov,link=https://codecov.io/gh/sbom-enforcer/sbom-enforcer]
+image:https://img.shields.io/maven-central/v/io.github.sbom-enforcer/sbom-enforcer-maven-plugin[Maven Central Version]
+
+The SBOM Enforcer Maven Plugin allows you to perform a set of custom checks on the SBOM produced by your build.
+
+See
+https://sbom-enforcer.github.io/maven-plugin/index.html[the project webpage] for more details.
+
+== QuickStart
+
+This plugin checks the quality of SBOMs attached to your builds.
+To use it, you need to:
+
+. Add a plugin execution to generate an SBOM.
+Currently only the
+https://github.com/CycloneDX/cyclonedx-maven-plugin[CycloneDX Maven Plugin]
+is supported.
+. Add a plugin execution of the `sbom-enforcer-maven-plugin`:
+
+[source,xml]
+----
+  <plugin>
+    <groupId>io.github.sbom-enforcer</groupId>
+    <artifactId>sbom-enforcer-maven-plugin</artifactId>
+    <version>0.2.0</version>
+    <executions>
+      <id>check-sbom</id>
+      <goals>
+        <goal>check</goal>
+      </goals>
+      <configuration>
+        <!--1-->
+        <checksum/>
+        <!--2-->
+        <verifyReferences/>
+      </configuration>
+    </executions>
+  </plugin>
+----
+<1> See https://sbom-enforcer.github.io/maven-plugin/usage.html#verify-dependency-checksums[verify dependency checksums] for more options.
+<2> See https://sbom-enforcer.github.io/maven-plugin/usage.html#verify-links-to-external-references[verify links to external references] for more options.
