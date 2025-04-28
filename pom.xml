@@ -754,7 +754,7 @@
             <configuration>
               <locales>default</locales>
               <attributes>
-                <cyclonedx-version>2.9.1</cyclonedx-version>
+                <cyclonedx-version>${cyclonedx-maven-plugin.version}</cyclonedx-version>
                 <project-version>${project.version}</project-version>
               </attributes>
             </configuration>
