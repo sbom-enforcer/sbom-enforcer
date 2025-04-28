@@ -17,9 +17,6 @@ package io.github.sbom.enforcer.internal.cyclonedx;
 
 import static io.github.sbom.enforcer.internal.CollectionUtils.nullToEmpty;
 
-import com.github.packageurl.MalformedPackageURLException;
-import com.github.packageurl.PackageURL;
-import com.github.packageurl.PackageURLBuilder;
 import io.github.sbom.enforcer.BillOfMaterials;
 import io.github.sbom.enforcer.BomBuilder;
 import io.github.sbom.enforcer.BomBuilderRequest;
@@ -34,6 +31,7 @@ import java.util.Collection;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import org.codehaus.plexus.logging.Logger;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Hash;
@@ -53,10 +51,12 @@ import org.eclipse.aether.resolution.ArtifactResolutionException;
 public class CycloneDxBomBuilder implements BomBuilder {
 
     private final RepositorySystem repoSystem;
+    private final Logger logger;
 
     @Inject
-    public CycloneDxBomBuilder(RepositorySystem repoSystem) {
+    public CycloneDxBomBuilder(RepositorySystem repoSystem, Logger logger) {
         this.repoSystem = repoSystem;
+        this.logger = logger;
     }
 
     @Override
@@ -99,7 +99,9 @@ public class CycloneDxBomBuilder implements BomBuilder {
     private Component processMainComponent(
             org.cyclonedx.model.Component component, Artifact artifact, Collection<Artifact> allBillsOfMaterials)
             throws BomBuildingException {
-        DefaultComponent.Builder builder = DefaultComponent.newBuilder().setArtifact(artifact);
+        Artifact mainArtifact = CycloneDxUtils.toArtifact(component);
+        mainArtifact = mainArtifact.setFile(artifact.getFile());
+        DefaultComponent.Builder builder = DefaultComponent.newBuilder().setArtifact(mainArtifact);
         allBillsOfMaterials.forEach(builder::addBillOfMaterials);
         processGenericComponent(builder, component);
         return builder.get();
@@ -112,7 +114,8 @@ public class CycloneDxBomBuilder implements BomBuilder {
         try {
             artifact = Artifacts.downloadArtifact(repoSystem, repoSession, artifact, remoteRepository);
         } catch (ArtifactResolutionException e) {
-            throw new BomBuildingException("Failed to download artifact " + artifact, e);
+            // This usually happens for "aggregate" SBOMs and artifacts from the
+            logger.warn("Failed to download artifact " + artifact, e);
         }
         DefaultComponent.Builder builder = DefaultComponent.newBuilder().setArtifact(artifact);
         processGenericComponent(builder, cdxComponent);
@@ -145,26 +148,7 @@ public class CycloneDxBomBuilder implements BomBuilder {
     // package-private for testing
     static void processGenericComponent(DefaultComponent.Builder builder, org.cyclonedx.model.Component component)
             throws BomBuildingException {
-        String purl = component.getPurl();
-        try {
-            if (purl != null) {
-                builder.setPurl(new PackageURL(purl));
-            } else {
-                String group = component.getGroup();
-                if (group != null) {
-                    builder.setPurl(PackageURLBuilder.aPackageURL()
-                            .withType(PackageURL.StandardTypes.MAVEN)
-                            .withNamespace(group)
-                            .withName(component.getName())
-                            .withVersion(component.getVersion())
-                            .build());
-                } else {
-                    throw new BomBuildingException("Missing PURL for component " + component);
-                }
-            }
-        } catch (MalformedPackageURLException e) {
-            throw new BomBuildingException("Unable to parse PURL for component: " + component, e);
-        }
+        builder.setPurl(CycloneDxUtils.toPackageURL(component));
         for (Hash hash : nullToEmpty(component.getHashes())) {
             builder.addChecksum(ChecksumAlgorithm.fromCycloneDx(hash.getAlgorithm()), hash.getValue());
         }

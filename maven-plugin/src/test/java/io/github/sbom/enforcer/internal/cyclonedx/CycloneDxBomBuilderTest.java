@@ -19,6 +19,7 @@ import static io.github.sbom.enforcer.internal.Artifacts.withClassifier;
 import static io.github.sbom.enforcer.internal.Artifacts.withExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
 
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
@@ -26,6 +27,7 @@ import io.github.sbom.enforcer.BillOfMaterials;
 import io.github.sbom.enforcer.BomBuilderRequest;
 import io.github.sbom.enforcer.BomBuildingException;
 import io.github.sbom.enforcer.Component;
+import io.github.sbom.enforcer.internal.CollectionUtils;
 import io.github.sbom.enforcer.internal.MojoUtils;
 import io.github.sbom.enforcer.support.DefaultBomBuilderRequest;
 import io.github.sbom.enforcer.support.DefaultComponent;
@@ -34,12 +36,15 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 import org.codehaus.plexus.PlexusContainer;
+import org.codehaus.plexus.logging.Logger;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.Artifact;
+import org.eclipse.aether.artifact.ArtifactProperties;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -52,6 +57,8 @@ class CycloneDxBomBuilderTest {
 
     private static final PackageURL log4jCorePurl = createPurl("pkg:maven/org.apache.logging.log4j/log4j-core@2.24.3");
     private static final PackageURL log4jApiPurl = createPurl("pkg:maven/org.apache.logging.log4j/log4j-api@2.24.3");
+    private static final PackageURL log4jApiRedhatPurl = createPurl(
+            "pkg:maven/org.apache.logging.log4j/log4j-api@2.23.1.redhat-00001?repository_url=https%3A%2F%2Fmaven.repository.redhat.com%2Fga");
     private static final PackageURL minimalPurl = createPurl("pkg:maven/groupId/artifactId");
 
     @TempDir
@@ -75,17 +82,25 @@ class CycloneDxBomBuilderTest {
         repoSession = MojoUtils.createRepositorySystemSession(container, localRepositoryPath);
     }
 
-    @Test
-    void createSingleDepBom() throws Exception {
-        CycloneDxBomBuilder builder = new CycloneDxBomBuilder(repoSystem);
-        BomBuilderRequest request = createRequest("single-dep-cyclonedx.xml");
+    static Stream<Arguments> createSingleDepBom() {
+        return Stream.of(
+                Arguments.of("single-dep-cyclonedx.xml", log4jApiPurl, 1),
+                // RedHat does not publish SBOMs
+                Arguments.of("single-dep2-cyclonedx.xml", log4jApiRedhatPurl, 0));
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    void createSingleDepBom(String resource, PackageURL dependencyPurl, int bomCount) throws Exception {
+        CycloneDxBomBuilder builder = new CycloneDxBomBuilder(repoSystem, mock(Logger.class));
+        BomBuilderRequest request = createRequest(resource);
         BillOfMaterials bom = builder.build(repoSession, request);
         assertThat(bom).isNotNull();
         // Main component
         Component component = bom.getComponent();
         assertThat(component).isNotNull();
         assertThat(component.getPurl()).isEqualTo(log4jCorePurl);
-        assertThat(component.getArtifact()).isEqualTo(request.getArtifact());
+        assertArtifactEquals(request.getArtifact(), component.getArtifact());
         assertThat(component.getBillsOfMaterials()).hasSize(1).containsExactly(request.getMainBillOfMaterials());
         assertThat(component.getChecksums()).isEmpty();
         assertThat(component.getExternalReferences())
@@ -97,9 +112,10 @@ class CycloneDxBomBuilderTest {
         assertThat(dependencies).hasSize(1);
         Component dependency = dependencies.iterator().next();
         assertThat(dependency).isNotNull();
-        assertThat(dependency.getPurl()).isEqualTo(log4jApiPurl);
+        assertThat(dependency.getPurl()).isEqualTo(dependencyPurl);
         assertThat(dependency.getArtifact()).isNotNull();
-        assertThat(dependency.getBillsOfMaterials()).hasSize(1);
+        assertThat(dependency.getArtifact().getFile()).exists();
+        assertThat(dependency.getBillsOfMaterials()).hasSize(bomCount);
         assertThat(dependency.getChecksums())
                 .hasSize(2)
                 .containsEntry(Component.ChecksumAlgorithm.MD5, "d89516699543c5c21be87ee1760695f3")
@@ -108,8 +124,28 @@ class CycloneDxBomBuilderTest {
     }
 
     @Test
+    void createNonExistentDepBom() throws Exception {
+        CycloneDxBomBuilder builder = new CycloneDxBomBuilder(repoSystem, mock(Logger.class));
+        BomBuilderRequest request = createRequest("non-existent-dep-cyclonedx.xml");
+        BillOfMaterials bom = builder.build(repoSession, request);
+        assertThat(bom).isNotNull();
+        // Dependencies
+        Collection<? extends Component> dependencies = bom.getDependencies();
+        assertThat(dependencies).hasSize(1);
+        Component dependency = dependencies.iterator().next();
+        assertThat(dependency).isNotNull();
+        assertThat(dependency.getPurl()).isEqualTo(new PackageURL("pkg:maven/invalid/artifactId@1.0.0"));
+        Artifact dependencyArtifact = dependency.getArtifact();
+        assertThat(dependencyArtifact).isNotNull();
+        assertThat(dependencyArtifact.getFile()).isNull();
+        assertThat(dependency.getBillsOfMaterials()).isEmpty();
+        assertThat(dependency.getChecksums()).isEmpty();
+        assertThat(dependency.getExternalReferences()).isEmpty();
+    }
+
+    @Test
     void createNoDepBom() throws Exception {
-        CycloneDxBomBuilder builder = new CycloneDxBomBuilder(repoSystem);
+        CycloneDxBomBuilder builder = new CycloneDxBomBuilder(repoSystem, mock(Logger.class));
         BomBuilderRequest request = createRequest("no-dep-cyclonedx.xml");
         BillOfMaterials bom = builder.build(repoSession, request);
         assertThat(bom).isNotNull();
@@ -117,16 +153,21 @@ class CycloneDxBomBuilderTest {
         Component component = bom.getComponent();
         assertThat(component).isNotNull();
         assertThat(component.getPurl()).isEqualTo(log4jCorePurl);
-        assertThat(component.getArtifact()).isEqualTo(request.getArtifact());
+        assertArtifactEquals(request.getArtifact(), component.getArtifact());
         assertThat(component.getBillsOfMaterials()).hasSize(1).containsExactly(request.getMainBillOfMaterials());
         assertThat(component.getChecksums()).isEmpty();
         assertThat(component.getExternalReferences()).isEmpty();
     }
 
-    @Test
-    void createEmptyBom() throws Exception {
-        CycloneDxBomBuilder builder = new CycloneDxBomBuilder(repoSystem);
-        BomBuilderRequest request = createRequest("empty-cyclonedx.xml");
+    static Stream<String> createEmptyBom() {
+        return Stream.of("empty-cyclonedx.xml", "empty2-cyclonedx.xml");
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    void createEmptyBom(String resource) throws Exception {
+        CycloneDxBomBuilder builder = new CycloneDxBomBuilder(repoSystem, mock(Logger.class));
+        BomBuilderRequest request = createRequest(resource);
         assertThatThrownBy(() -> builder.build(repoSession, request)).isInstanceOf(BomBuildingException.class);
     }
 
@@ -166,7 +207,9 @@ class CycloneDxBomBuilderTest {
     }
 
     private static Artifact createArtifact(PackageURL purl) {
-        return new DefaultArtifact(purl.getNamespace(), purl.getName(), null, null, purl.getVersion());
+        Map<String, String> qualifiers = CollectionUtils.nullToEmpty(purl.getQualifiers());
+        String type = qualifiers.getOrDefault(ArtifactProperties.TYPE, "jar");
+        return new DefaultArtifact(purl.getNamespace(), purl.getName(), null, type, purl.getVersion());
     }
 
     private static BomBuilderRequest createRequest(String bomResource) throws URISyntaxException {
@@ -180,5 +223,13 @@ class CycloneDxBomBuilderTest {
                 .setArtifact(artifact)
                 .setMainBillOfMaterials(bomArtifact)
                 .get();
+    }
+
+    private static void assertArtifactEquals(Artifact expected, Artifact actual) {
+        assertThat(actual.getGroupId()).as("groupId of %s", actual).isEqualTo(expected.getGroupId());
+        assertThat(actual.getArtifactId()).as("artifactId of %s", actual).isEqualTo(expected.getArtifactId());
+        assertThat(actual.getClassifier()).as("classifier of %s", actual).isEqualTo(expected.getClassifier());
+        assertThat(actual.getExtension()).as("extension of %s", actual).isEqualTo(expected.getExtension());
+        assertThat(actual.getVersion()).as("version of %s", actual).isEqualTo(expected.getVersion());
     }
 }

@@ -17,10 +17,11 @@ package io.github.sbom.enforcer.internal.cyclonedx;
 
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
+import com.github.packageurl.PackageURLBuilder;
 import io.github.sbom.enforcer.BomBuildingException;
 import io.github.sbom.enforcer.Component.Properties;
+import io.github.sbom.enforcer.internal.CollectionUtils;
 import java.io.File;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.cyclonedx.exception.ParseException;
@@ -55,7 +56,7 @@ public final class CycloneDxUtils {
 
     public static Artifact toArtifact(Component component) throws BomBuildingException {
         PackageURL packageURL = toPackageURL(component);
-        Map<String, String> qualifiers = safeGetQualifiers(packageURL);
+        Map<String, String> qualifiers = CollectionUtils.nullToEmpty(packageURL.getQualifiers());
         String type = qualifiers.getOrDefault(ArtifactProperties.TYPE, "jar");
         String classifier = qualifiers.get(CLASSIFIER);
         String repositoryUrl = qualifiers.get(REPOSITORY_URL);
@@ -70,15 +71,24 @@ public final class CycloneDxUtils {
                 .setProperties(properties);
     }
 
-    private static PackageURL toPackageURL(Component component) throws BomBuildingException {
+    public static PackageURL toPackageURL(Component component) throws BomBuildingException {
         String purl = component.getPurl();
-        if (purl == null) {
-            throw new BomBuildingException("Missing pURL for dependency: " + component);
-        }
         try {
-            return new PackageURL(purl);
+            if (purl != null) {
+                return new PackageURL(purl);
+            }
+            String group = component.getGroup();
+            if (group != null) {
+                return PackageURLBuilder.aPackageURL()
+                        .withType(PackageURL.StandardTypes.MAVEN)
+                        .withNamespace(group)
+                        .withName(component.getName())
+                        .withVersion(component.getVersion())
+                        .build();
+            }
+            throw new BomBuildingException("Missing PURL and group for component " + component);
         } catch (MalformedPackageURLException e) {
-            throw new BomBuildingException("Invalid pURL for dependency: " + component, e);
+            throw new BomBuildingException("Invalid PURL for component: " + component, e);
         }
     }
 
@@ -95,11 +105,6 @@ public final class CycloneDxUtils {
             }
         }
         throw new IllegalArgumentException("Artifact " + artifact + " is not a CycloneDX document.");
-    }
-
-    private static Map<String, String> safeGetQualifiers(PackageURL packageURL) {
-        Map<String, String> qualifiers = packageURL.getQualifiers();
-        return qualifiers != null ? qualifiers : Collections.emptyMap();
     }
 
     private CycloneDxUtils() {}
