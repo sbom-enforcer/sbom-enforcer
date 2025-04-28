@@ -98,7 +98,7 @@ class CheckMojoTest {
         MavenExecutionResult result = mock(MavenExecutionResult.class);
         MavenSession session = createMavenSession(request, result);
         MojoExecution mojoExecution = new MojoExecution(createMojoDescriptor());
-        return new CheckMojo(null, session, mojoExecution, configurator, Set.of(), container);
+        return new CheckMojo(null, session, mojoExecution, configurator, Set.of(), container, null);
     }
 
     private static PlexusConfiguration fromString(String configuration) {

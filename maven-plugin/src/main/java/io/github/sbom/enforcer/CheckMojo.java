@@ -17,6 +17,7 @@ package io.github.sbom.enforcer;
 
 import io.github.sbom.enforcer.internal.Artifacts;
 import io.github.sbom.enforcer.support.DefaultBomBuilderRequest;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -43,9 +44,11 @@ import org.codehaus.plexus.configuration.DefaultPlexusConfiguration;
 import org.codehaus.plexus.configuration.PlexusConfiguration;
 import org.eclipse.aether.AbstractForwardingRepositorySystemSession;
 import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.repository.LocalRepository;
+import org.eclipse.aether.repository.LocalRepositoryManager;
+import org.eclipse.aether.repository.NoLocalRepositoryManagerException;
 import org.eclipse.aether.repository.RepositoryPolicy;
-import org.eclipse.aether.repository.WorkspaceReader;
-import org.jspecify.annotations.Nullable;
+import org.eclipse.aether.spi.localrepo.LocalRepositoryManagerFactory;
 
 /**
  * Performs a configurable set of checks on the SBOMs attached to the build.
@@ -57,11 +60,11 @@ import org.jspecify.annotations.Nullable;
 public class CheckMojo extends AbstractMojo {
 
     /**
-     * If set to {@code true}, the contents of the local Maven repository are ignored and artifacts are downloaded again
-     * from remote repositories.
+     * If set to {@code true}, the contents of the per-user local Maven repository are ignored
+     * and a per-Maven module local Maven repository is used instead.
      */
     @Parameter(defaultValue = "false")
-    private boolean forceDependencyUpdate;
+    private boolean usePrivateLocalRepo;
 
     /**
      * Configuration of the rules to execute.
@@ -74,6 +77,12 @@ public class CheckMojo extends AbstractMojo {
      */
     @Parameter(defaultValue = "${repositorySystemSession}", readonly = true)
     private RepositorySystemSession repoSession;
+
+    /**
+     * Path to a local Maven repository to use if `usePrivateLocalRepo` is true.
+     */
+    @Parameter(defaultValue = "${project.build.directory}/sbom-enforcer/repository")
+    protected Path privateLocalRepoPath;
 
     /**
      * The current Maven project.
@@ -105,6 +114,11 @@ public class CheckMojo extends AbstractMojo {
      */
     private final PlexusContainer container;
 
+    /**
+     * Used to create a temporary local repository.
+     */
+    private final LocalRepositoryManagerFactory localRepositoryManagerFactory;
+
     @Inject
     public CheckMojo(
             MavenProject project,
@@ -112,13 +126,15 @@ public class CheckMojo extends AbstractMojo {
             MojoExecution mojoExecution,
             @Named("basic") ComponentConfigurator componentConfigurator,
             Set<BomBuilder> bomBuilders,
-            PlexusContainer container) {
+            PlexusContainer container,
+            LocalRepositoryManagerFactory localRepositoryManagerFactory) {
         this.project = project;
         this.session = session;
         this.mojoExecution = mojoExecution;
         this.componentConfigurator = componentConfigurator;
         this.bomBuilders = bomBuilders;
         this.container = container;
+        this.localRepositoryManagerFactory = localRepositoryManagerFactory;
     }
 
     @Override
@@ -130,13 +146,15 @@ public class CheckMojo extends AbstractMojo {
         }
     }
 
-    private void checkArtifact(Artifact bomArtifact, List<? extends EnforcerRule> rules) throws MojoFailureException {
+    private void checkArtifact(Artifact bomArtifact, List<? extends EnforcerRule> rules)
+            throws MojoExecutionException, MojoFailureException {
         org.eclipse.aether.artifact.Artifact mainBillOfMaterials = Artifacts.toArtifact(bomArtifact);
         for (BomBuilder bomBuilder : bomBuilders) {
             if (bomBuilder.isSupported(mainBillOfMaterials)) {
                 try {
-                    RepositorySystemSession effectiveRepoSession =
-                            forceDependencyUpdate ? new NoCacheRepositorySystemSession(repoSession) : repoSession;
+                    RepositorySystemSession effectiveRepoSession = usePrivateLocalRepo
+                            ? new CustomLocalRepositorySystemSession(repoSession, createLocalRepositoryManager())
+                            : repoSession;
 
                     // POM projects don't have a resolved artifact
                     org.eclipse.aether.artifact.Artifact artifact = Artifacts.toArtifact(project.getArtifact());
@@ -157,6 +175,15 @@ public class CheckMojo extends AbstractMojo {
                 }
                 break;
             }
+        }
+    }
+
+    private LocalRepositoryManager createLocalRepositoryManager() throws MojoExecutionException {
+        try {
+            LocalRepository repository = new LocalRepository(privateLocalRepoPath.toFile());
+            return localRepositoryManagerFactory.newInstance(repoSession, repository);
+        } catch (NoLocalRepositoryManagerException e) {
+            throw new MojoExecutionException(e);
         }
     }
 
@@ -188,12 +215,17 @@ public class CheckMojo extends AbstractMojo {
         rules.addChild(rule);
     }
 
-    private static class NoCacheRepositorySystemSession extends AbstractForwardingRepositorySystemSession {
+    /**
+     * Replaces the local repository manager to prevent the usage of artifacts installed locally.
+     */
+    private static class CustomLocalRepositorySystemSession extends AbstractForwardingRepositorySystemSession {
 
         private final RepositorySystemSession session;
+        private final LocalRepositoryManager localRepositoryManager;
 
-        NoCacheRepositorySystemSession(RepositorySystemSession session) {
+        CustomLocalRepositorySystemSession(RepositorySystemSession session, LocalRepositoryManager localRepositoryManager) {
             this.session = session;
+            this.localRepositoryManager = localRepositoryManager;
         }
 
         @Override
@@ -207,13 +239,8 @@ public class CheckMojo extends AbstractMojo {
         }
 
         @Override
-        public String getUpdatePolicy() {
-            return RepositoryPolicy.UPDATE_POLICY_ALWAYS;
-        }
-
-        @Override
-        public @Nullable WorkspaceReader getWorkspaceReader() {
-            return null;
+        public LocalRepositoryManager getLocalRepositoryManager() {
+            return localRepositoryManager;
         }
     }
 }

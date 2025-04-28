@@ -15,6 +15,10 @@
  */
 package io.github.sbom.enforcer.internal;
 
+import static io.github.sbom.enforcer.Component.Properties.MAVEN_CENTRAL_ALT_URL;
+import static io.github.sbom.enforcer.Component.Properties.MAVEN_CENTRAL_URL;
+import static io.github.sbom.enforcer.Component.Properties.REPOSITORY_URL;
+
 import io.github.sbom.enforcer.Component;
 import java.io.File;
 import java.util.Collections;
@@ -28,6 +32,7 @@ import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.ArtifactProperties;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.aether.resolution.ArtifactRequest;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
@@ -49,7 +54,7 @@ public final class Artifacts {
         if (repository != null) {
             String repositoryUrl = repository.getUrl();
             if (repositoryUrl != null) {
-                properties.put(Component.Properties.REPOSITORY_URL, repositoryUrl);
+                properties.put(REPOSITORY_URL, repositoryUrl);
             }
         }
 
@@ -88,10 +93,20 @@ public final class Artifacts {
                 artifact.getFile());
     }
 
-    public static RemoteRepository getRemoteRepository(Artifact artifact) {
-        String repositoryUrl =
-                artifact.getProperty(Component.Properties.REPOSITORY_URL, Component.Properties.MAVEN_CENTRAL_URL);
-        return new RemoteRepository.Builder(null, "default", repositoryUrl).build();
+    public static RemoteRepository getRemoteRepository(Artifact artifact, RepositorySystemSession repoSession) {
+        String repositoryUrl = artifact.getProperty(REPOSITORY_URL, MAVEN_CENTRAL_URL);
+        // We use the URL as id, except for Maven Central, so we can use Mimir
+        String repositoryId = MAVEN_CENTRAL_URL.equals(repositoryUrl) || MAVEN_CENTRAL_ALT_URL.equals(repositoryUrl)
+                ? "central"
+                : repositoryUrl;
+        return new RemoteRepository.Builder(repositoryId, "default", repositoryUrl)
+                .setReleasePolicy(createRepositoryPolicy(repoSession, true))
+                .setSnapshotPolicy(createRepositoryPolicy(repoSession, false))
+                .build();
+    }
+
+    private static RepositoryPolicy createRepositoryPolicy(RepositorySystemSession repoSession, boolean enabled) {
+        return new RepositoryPolicy(enabled, repoSession.getUpdatePolicy(), repoSession.getChecksumPolicy());
     }
 
     public static Artifact downloadArtifact(
