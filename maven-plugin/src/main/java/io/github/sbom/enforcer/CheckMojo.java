@@ -211,6 +211,22 @@ public class CheckMojo extends AbstractMojo {
         return enforcerRules;
     }
 
+    public void setUsePrivateLocalRepo(boolean usePrivateLocalRepo) {
+        this.usePrivateLocalRepo = usePrivateLocalRepo;
+    }
+
+    public void setPrivateLocalRepoPath(Path privateLocalRepoPath) {
+        this.privateLocalRepoPath = privateLocalRepoPath;
+    }
+
+    public void setRules(PlexusConfiguration rules) {
+        this.rules = rules;
+    }
+
+    public void setRepoSession(RepositorySystemSession repoSession) {
+        this.repoSession = repoSession;
+    }
+
     public void addRule(PlexusConfiguration rule) {
         rules.addChild(rule);
     }
