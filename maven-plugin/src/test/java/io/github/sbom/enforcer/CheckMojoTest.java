@@ -25,6 +25,7 @@ import io.github.sbom.enforcer.rules.ValidateReferencesRule;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -295,8 +296,8 @@ class CheckMojoTest {
         mojo.execute();
     }
 
-    private Path getResourcePath(String resource) {
+    private Path getResourcePath(String resource) throws URISyntaxException {
         URL url = Objects.requireNonNull(CheckMojoTest.class.getClassLoader().getResource(resource));
-        return Paths.get(url.getPath());
+        return Paths.get(url.toURI());
     }
 }
