@@ -524,6 +524,9 @@
             <goals>
               <goal>prepare-agent</goal>
             </goals>
+            <configuration>
+              <propertyName>jacoco.command</propertyName>
+            </configuration>
           </execution>
           <execution>
             <id>report-test-coverage</id>
@@ -640,6 +643,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
+          <argLine>@{jacoco.command}</argLine>
           <!-- Using module path while running tests causes `IllegalAccess` exceptions.
                We relax that constraint for tests and use class path there. -->
           <useModulePath>false</useModulePath>
