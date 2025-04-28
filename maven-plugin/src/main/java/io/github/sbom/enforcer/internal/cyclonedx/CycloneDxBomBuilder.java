@@ -17,9 +17,6 @@ package io.github.sbom.enforcer.internal.cyclonedx;
 
 import static io.github.sbom.enforcer.internal.CollectionUtils.nullToEmpty;
 
-import com.github.packageurl.MalformedPackageURLException;
-import com.github.packageurl.PackageURL;
-import com.github.packageurl.PackageURLBuilder;
 import io.github.sbom.enforcer.BillOfMaterials;
 import io.github.sbom.enforcer.BomBuilder;
 import io.github.sbom.enforcer.BomBuilderRequest;
@@ -102,7 +99,9 @@ public class CycloneDxBomBuilder implements BomBuilder {
     private Component processMainComponent(
             org.cyclonedx.model.Component component, Artifact artifact, Collection<Artifact> allBillsOfMaterials)
             throws BomBuildingException {
-        DefaultComponent.Builder builder = DefaultComponent.newBuilder().setArtifact(artifact);
+        Artifact mainArtifact = CycloneDxUtils.toArtifact(component);
+        mainArtifact = mainArtifact.setFile(artifact.getFile());
+        DefaultComponent.Builder builder = DefaultComponent.newBuilder().setArtifact(mainArtifact);
         allBillsOfMaterials.forEach(builder::addBillOfMaterials);
         processGenericComponent(builder, component);
         return builder.get();
@@ -149,26 +148,7 @@ public class CycloneDxBomBuilder implements BomBuilder {
     // package-private for testing
     static void processGenericComponent(DefaultComponent.Builder builder, org.cyclonedx.model.Component component)
             throws BomBuildingException {
-        String purl = component.getPurl();
-        try {
-            if (purl != null) {
-                builder.setPurl(new PackageURL(purl));
-            } else {
-                String group = component.getGroup();
-                if (group != null) {
-                    builder.setPurl(PackageURLBuilder.aPackageURL()
-                            .withType(PackageURL.StandardTypes.MAVEN)
-                            .withNamespace(group)
-                            .withName(component.getName())
-                            .withVersion(component.getVersion())
-                            .build());
-                } else {
-                    throw new BomBuildingException("Missing PURL for component " + component);
-                }
-            }
-        } catch (MalformedPackageURLException e) {
-            throw new BomBuildingException("Unable to parse PURL for component: " + component, e);
-        }
+        builder.setPurl(CycloneDxUtils.toPackageURL(component));
         for (Hash hash : nullToEmpty(component.getHashes())) {
             builder.addChecksum(ChecksumAlgorithm.fromCycloneDx(hash.getAlgorithm()), hash.getValue());
         }
