@@ -836,6 +836,11 @@
                 <goals>
                   <goal>baseline</goal>
                 </goals>
+                <configuration>
+                  <base>
+                    <version>0.1.0</version>
+                  </base>
+                </configuration>
               </execution>
             </executions>
           </plugin>
