@@ -92,7 +92,7 @@
   <properties>
     <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <revision>0.2.0</revision>
+    <revision>0.2.1-SNAPSHOT</revision>
 
     <!-- `bnd-maven-plugin` 7.x requires a Maven version `3.8.1` or higher -->
     <javaBuildVersion>17</javaBuildVersion>
