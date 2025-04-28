@@ -19,7 +19,6 @@ import static io.github.sbom.enforcer.Component.Properties.MAVEN_CENTRAL_ALT_URL
 import static io.github.sbom.enforcer.Component.Properties.MAVEN_CENTRAL_URL;
 import static io.github.sbom.enforcer.Component.Properties.REPOSITORY_URL;
 
-import io.github.sbom.enforcer.Component;
 import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
@@ -106,7 +105,17 @@ public final class Artifacts {
     }
 
     private static RepositoryPolicy createRepositoryPolicy(RepositorySystemSession repoSession, boolean enabled) {
-        return new RepositoryPolicy(enabled, repoSession.getUpdatePolicy(), repoSession.getChecksumPolicy());
+        // Default update policy
+        String updatePolicy = RepositoryPolicy.UPDATE_POLICY_DAILY;
+        if (repoSession.getUpdatePolicy() != null) {
+            updatePolicy = repoSession.getUpdatePolicy();
+        }
+        // Stricter than the default policy
+        String checksumPolicy = RepositoryPolicy.CHECKSUM_POLICY_FAIL;
+        if (repoSession.getChecksumPolicy() != null) {
+            checksumPolicy = repoSession.getChecksumPolicy();
+        }
+        return new RepositoryPolicy(enabled, updatePolicy, checksumPolicy);
     }
 
     public static Artifact downloadArtifact(

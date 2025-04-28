@@ -223,7 +223,8 @@ public class CheckMojo extends AbstractMojo {
         private final RepositorySystemSession session;
         private final LocalRepositoryManager localRepositoryManager;
 
-        CustomLocalRepositorySystemSession(RepositorySystemSession session, LocalRepositoryManager localRepositoryManager) {
+        CustomLocalRepositorySystemSession(
+                RepositorySystemSession session, LocalRepositoryManager localRepositoryManager) {
             this.session = session;
             this.localRepositoryManager = localRepositoryManager;
         }

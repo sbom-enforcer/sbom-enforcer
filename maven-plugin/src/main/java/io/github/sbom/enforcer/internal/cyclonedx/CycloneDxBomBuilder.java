@@ -114,8 +114,8 @@ public class CycloneDxBomBuilder implements BomBuilder {
         try {
             artifact = Artifacts.downloadArtifact(repoSystem, repoSession, artifact, remoteRepository);
         } catch (ArtifactResolutionException e) {
-            // This usually happens for "aggregate" SBOMs and artifacts from the
-            logger.warn("Failed to download artifact " + artifact, e);
+            // This usually happens for "aggregate" SBOMs and artifacts from the reactor that were not built yet.
+            logger.warn("Failed to download artifact " + artifact);
         }
         DefaultComponent.Builder builder = DefaultComponent.newBuilder().setArtifact(artifact);
         processGenericComponent(builder, cdxComponent);
