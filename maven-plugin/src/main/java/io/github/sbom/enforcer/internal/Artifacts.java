@@ -35,6 +35,7 @@ import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.aether.resolution.ArtifactRequest;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Utilities for {@link Artifact} objects.
@@ -94,28 +95,27 @@ public final class Artifacts {
 
     public static RemoteRepository getRemoteRepository(Artifact artifact, RepositorySystemSession repoSession) {
         String repositoryUrl = artifact.getProperty(REPOSITORY_URL, MAVEN_CENTRAL_URL);
+        if (repositoryUrl.equals(MAVEN_CENTRAL_ALT_URL)) {
+            repositoryUrl = MAVEN_CENTRAL_URL;
+        }
         // We use the URL as id, except for Maven Central, so we can use Mimir
-        String repositoryId = MAVEN_CENTRAL_URL.equals(repositoryUrl) || MAVEN_CENTRAL_ALT_URL.equals(repositoryUrl)
-                ? "central"
-                : repositoryUrl;
+        String repositoryId = MAVEN_CENTRAL_URL.equals(repositoryUrl) ? "central" : repositoryUrl;
+        String updatePolicy = repoSession.getUpdatePolicy();
+        String checksumPolicy = repoSession.getChecksumPolicy();
         return new RemoteRepository.Builder(repositoryId, "default", repositoryUrl)
-                .setReleasePolicy(createRepositoryPolicy(repoSession, true))
-                .setSnapshotPolicy(createRepositoryPolicy(repoSession, false))
+                .setReleasePolicy(createRepositoryPolicy(true, updatePolicy, checksumPolicy))
+                .setSnapshotPolicy(createRepositoryPolicy(false, updatePolicy, checksumPolicy))
                 .build();
     }
 
-    private static RepositoryPolicy createRepositoryPolicy(RepositorySystemSession repoSession, boolean enabled) {
-        // Default update policy
-        String updatePolicy = RepositoryPolicy.UPDATE_POLICY_DAILY;
-        if (repoSession.getUpdatePolicy() != null) {
-            updatePolicy = repoSession.getUpdatePolicy();
-        }
-        // Stricter than the default policy
-        String checksumPolicy = RepositoryPolicy.CHECKSUM_POLICY_FAIL;
-        if (repoSession.getChecksumPolicy() != null) {
-            checksumPolicy = repoSession.getChecksumPolicy();
-        }
-        return new RepositoryPolicy(enabled, updatePolicy, checksumPolicy);
+    static RepositoryPolicy createRepositoryPolicy(
+            boolean enabled, @Nullable String updatePolicy, @Nullable String checksumPolicy) {
+        return new RepositoryPolicy(
+                enabled,
+                updatePolicy == null || updatePolicy.isEmpty() ? RepositoryPolicy.UPDATE_POLICY_DAILY : updatePolicy,
+                checksumPolicy == null || checksumPolicy.isEmpty()
+                        ? RepositoryPolicy.CHECKSUM_POLICY_FAIL
+                        : checksumPolicy);
     }
 
     public static Artifact downloadArtifact(
