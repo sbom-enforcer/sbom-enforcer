@@ -55,37 +55,58 @@ public class ValidateReferencesRule implements EnforcerRule {
     private final Map<URI, Integer> responseCodeCache = new HashMap<>();
 
     /**
-     * Fail on 401 or 403 response codes.
+     * If {@code true}, the rule will fail if any reference returns a `401` or `403` code.
      */
     private boolean failOnAuth = false;
 
     /**
-     * Fail on 301 or 302 response codes.
+     * If {@code true}, the rule will fail if any reference returns a `301` or `302` code.
      */
     private boolean failOnRedirect = false;
 
     /**
-     * Check references in dependencies
+     * If {@code true}, the rule will also check the external references from dependency components.
      */
     private boolean checkDependencies = true;
 
     /**
-     * Consider broken links in dependencies as errors instead of warnings.
+     * If {@code true}, the build will also fail if a broken link is encountered in a dependency component.
+     * <p>
+     *     Otherwise, the problem is logged.
+     * </p>
      */
     private boolean failOnDependencies = false;
 
     /**
-     * Maximum IO errors per host
+     * Maximum number of IO errors for each HTTP domain.
+     * <p>
+     *     After the limit has been reached, the rule will ignore links to that HTTP domain.
+     * </p>
      */
     int maxFailuresPerHost = DEFAULT_MAX_FAILURES_PER_HOST;
 
     /**
-     * List of external reference types to include in the check.
+     * Set of external reference types to include in the check.
+     * <p>
+     *     If <em>empty</em>, all types will be checked.
+     * </p>
      */
     Set<String> includes = Set.of();
 
     /**
-     * List of external reference types to exclude from the check.
+     * Set of external reference types to exclude from the check.
+     * <p>
+     *     The default is equivalent to:
+     * </p>
+     * <pre>
+     *     &lt;excludes>
+     *         &lt;exclude>distribution-intake&lt;/exclude>
+     *     &lt;/excludes>
+     * </pre>
+     * <p>
+     *     The {@code distribution-intake} external reference is usually protected by authentication and is not useful
+     *     for the consumers of an artifact.
+     * </p>
      */
     Set<String> excludes = Set.of("distribution-intake");
 

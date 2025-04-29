@@ -66,12 +66,15 @@ and the SBOM Enforcer Maven Plugin to your build:
 == Verify dependency checksums
 
 Since the Maven local repository in `~/.m2/repository` is used both as a cache for dependencies downloaded from remote repositories and a staging area for published artifacts, it might happen that the dependencies it contains **differ** from the originals in Maven Central.
-To make sure your SBOM checksums are correct use this configuration:
+To make sure your SBOM checksums are correct, use this configuration:
 
 [source,xml]
 ----
-include::./examples/checksum.xml[tags=!license]
+include::examples/checksum.xml[tags=!license]
 ----
+
+For the configuration details see
+xref:rules.adoc#checksum[<checksum>].
 
 [#validateReferences]
 == Verify links to external references
@@ -80,8 +83,11 @@ To ensure that all the links included in the SBOM point to existing resources us
 
 [source,xml]
 ----
-include::./examples/validateReferences.xml[tags=!license]
+include::examples/validateReferences.xml[tags=!license]
 ----
 
 All the configuration attributes are optional.
 The values above are the default values.
+
+For the configuration details see
+xref:rules.adoc#validate-references[<validateReferences>].
