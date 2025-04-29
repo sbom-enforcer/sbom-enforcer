@@ -18,161 +18,183 @@
 By default, the SBOM Enforcer Maven Plugin offers the following rules.
 
 [#checksum]
-== `checksum`
+== <checksum>
+
+**Description:**
 
 The `checksum` rules does not have any configuration option and verifies that the checksums included in the SBOM are correct.
 Since the Maven local repository is used both as cache for consumed artifacts and staging area for published artifacts, it might happen that its content differs from the originals on Maven Central.
 
-[TIP]
-====
+**Tip:**
+
 This rule is mostly useful in a `release` profile, together with the
-link:./check-mojo.html#useprivatelocalrepo[`usePrivateLocalRepo`]
+link:check-mojo.html#useprivatelocalrepo[`usePrivateLocalRepo`]
 plugin parameter.
-====
+
+**Example:**
+
+See xref:usage.adoc#checksum[Verify dependency checksums] for a usage example.
 
 [#validate-references]
-== `validateReferences`
+== <validateReferences>
 
-The `validateReferences` checks the URLs contained in your SBOM file to look for broken links.
-It accepts the following configuration options:
+**Description:**
+
+The `validateReferences` rule checks the URLs contained in your SBOM file to look for broken links.
+
+**Example:**
+
+See xref:usage.adoc#validateReferences[Verify links to external references] for a usage example.
+
+[#validate-references-parameters]
+=== Optional Parameters
+
+[cols="1,1,1,5"]
+|===
+| Name | Type | Since | Description
+
+| `<<validate-references-check-dependencies>>`
+| `boolean`
+| `0.2.0`
+|
+If `true`, the rule will also check the external references from dependency components. +
+**Default**: `true`
+
+| `<<validate-references-fail-on-dependencies>>`
+| `boolean`
+| `0.2.0`
+|
+If `true`, the build will also fail if a broken link is encountered in a dependency component. +
+Otherwise, the problem is only logged. +
+**Default**: `false`
+
+| `<<validate-references-fail-on-redirect>>`
+| `boolean`
+| -
+|
+If `true`, the rule will fail if any reference returns a `301` or `302` code. +
+**Default**: `false`
+
+| `<<validate-references-fail-on-auth>>`
+| `boolean`
+| -
+|
+If `true`, the rule will fail if any reference returns a `401` or `403` code. +
+**Default**: `false`
+
+| `<<validate-references-max-failures-per-host>>`
+| `int`
+| `0.2.0`
+|
+Maximum number of IO errors for each HTTP domain. +
+**Default**: `3`
+
+| `<<validate-references-timeout-ms>>`
+| `int`
+| `0.2.0`
+|
+Maximum number of milliseconds to wait for each URL. +
+**Default**: `5000`
+
+| `<<validate-references-includes>>`
+| `List<String>`
+| `0.2.0`
+|
+Set of external reference types to include in the check. +
+If _empty_, all types will be checked. +
+**Default**: _empty_
+
+| `<<validate-references-excludes>>`
+| `List<String>`
+| `0.2.0`
+|
+Set of external reference types to exclude from the check. +
+**Default**: `[distribution-intake]`
+|===
+
+[#validate-references-parameter-details]
+=== Parameter details
 
 [#validate-references-check-dependencies]
-=== `checkDependencies`
+==== <checkDependencies>
 
-[cols="1h,5"]
-|===
+If `true`, the rule will also check the external references from dependency components.
 
-| Type
-| `boolean`
-
-| Default
-| `true`
-
-| Description
-|
-If `true` (default), the rule will also check the external references from dependency components.
-|===
+* **Type**: `boolean`
+* **Required**: `No`
+* **Default**: `true`
 
 [#validate-references-fail-on-dependencies]
-=== `failOnDependencies`
+==== <failOnDependencies>
 
-[cols="1h,5"]
-|===
-
-| Type
-| `boolean`
-
-| Default
-| `false`
-
-| Description
-|
 If `true`, the build will also fail if a broken link is encountered in a dependency component.
 Otherwise, the problem is only logged.
-|===
+
+* **Type**: `boolean`
+* **Required**: `No`
+* **Default**: `false`
 
 [#validate-references-fail-on-redirect]
-=== `failOnRedirect`
+==== <failOnRedirect>
 
-[cols="1h,5"]
-|===
-
-| Type
-| `boolean`
-
-| Default
-| `false`
-
-| Description
-|
 If `true`, the rule will fail if any reference returns a `301` or `302` code.
-|===
+
+* **Type**: `boolean`
+* **Required**: `No`
+* **Default**: `false`
 
 [#validate-references-fail-on-auth]
-=== `failOnAuth`
+==== <failOnAuth>
 
-[cols="1h,5"]
-|===
-
-| Type
-| `boolean`
-
-| Default
-| `false`
-
-| Description
-|
 If `true`, the rule will fail if any reference returns a `401` or `403` code.
-|===
+
+* **Type**: `boolean`
+* **Required**: `No`
+* **Default**: `false`
 
 [#validate-references-max-failures-per-host]
-=== `maxFailuresPerHost`
+==== <maxFailuresPerHost>
 
-[cols="1h,5"]
-|===
-
-| Type
-| `int`
-
-| Default
-| `3`
-
-| Description
-|
 Maximum number of IO errors for each HTTP domain.
 After the limit has been reached, the rule will ignore links to that HTTP domain.
-|===
+
+* **Type**: `int`
+* **Required**: `No`
+* **Default**: `3`
 
 [#validate-references-timeout-ms]
-=== `timeoutMs`
+==== <timeoutMs>
 
-[cols="1h,5"]
-|===
-
-| Type
-| `int`
-
-| Default
-| `5000`
-
-| Description
-|
 Maximum number of milliseconds to wait for each URL.
-|===
+
+* **Type**: `int`
+* **Required**: `No`
+* **Default**: `5000`
 
 [#validate-references-includes]
-=== `includes`
+==== <includes>
 
-[cols="1h,5"]
-|===
-
-| Type
-| `Set<String>`
-
-| Default
-| _empty_
-
-| Description
-|
 Set of external reference types to include in the check.
-If empty, all types will be checked.
-See also <<validate-references-excludes>>.
-|===
+If _empty_, all types will be checked.
+
+* **Type**: `List<String>`
+* **Required**: `No`
+* **Default**: _empty_
 
 [#validate-references-excludes]
-=== `excludes`
+==== <excludes>
 
-[cols="1h,5"]
-|===
-
-| Type
-| `Set<String>`
-
-| Default
-| `distribution-intake`
-
-| Description
-|
 Set of external reference types to exclude from the check.
-By default `distribution-intake` is excluded, since it is not very useful to SBOM consumers and usually requires authentication.
-|===
+The default is equivalent to:
+[source,xml]
+----
+<excludes>
+  <exclude>distribution-intake</exclude>
+</excludes>
+----
+The `distribution-intake` external reference is usually protected by authentication and is not useful for the consumers of an artifact.
+
+* **Type**: `List<String>`
+* **Required**: `No`
+* **Default**: `[distribution-intake]`
+

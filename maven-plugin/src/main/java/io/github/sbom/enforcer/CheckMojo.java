@@ -111,6 +111,9 @@ public class CheckMojo extends AbstractMojo {
 
     /**
      * Used to retrieve instances of {@link EnforcerRule} by name.
+     * <p>
+     *     See also <a href="rules.html>collection of built-in rules</a>.
+     * </p>
      */
     private final PlexusContainer container;
 
