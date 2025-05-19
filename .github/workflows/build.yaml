@@ -52,15 +52,7 @@ jobs:
           # Compute the key cache
           echo MIMIR_KEY="mimir-cache-$(date +'%Y-%m')" >> $GITHUB_ENV
           # Mimir currently does not support relative paths, so we need to compute the absolute path of `mimir`.
-          MIMIR_BASEDIR="`pwd`/mimir"
-          case `uname` in
-            MINGW*) MIMIR_BASEDIR=`cygpath -w "MIMIR_BASEDIR"`;;
-          esac
-          echo MAVEN_OPTS="-Dmimir.basedir=$MIMIR_BASEDIR" >> $GITHUB_ENV
-          # Install Mimir
-          ./mvnw \
-            --show-version --batch-mode --no-transfer-progress \
-            -Pmimir-install
+          echo MAVEN_OPTS="-Dmimir.daemon.passOnBasedir=true -Dmimir.basedir=$GITHUB_WORKSPACE/mimir" >> $GITHUB_ENV
 
       - name: Setup Mimir Cache
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # 4.2.3

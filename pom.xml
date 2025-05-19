@@ -137,7 +137,6 @@
     <mimir.version>0.7.3</mimir.version>
     <spotbugs-maven-plugin.version>4.9.3.0</spotbugs-maven-plugin.version>
     <spotless-maven-plugin.version>2.44.4</spotless-maven-plugin.version>
-    <toolbox.version>0.8.1</toolbox.version>
 
     <!-- Dependency versions -->
     <assertj.version>3.27.3</assertj.version>
@@ -452,6 +451,12 @@
         </plugin>
 
         <plugin>
+          <groupId>eu.maveniverse.maven.mimir</groupId>
+          <artifactId>extension</artifactId>
+          <version>${mimir.version}</version>
+        </plugin>
+
+        <plugin>
           <groupId>com.github.spotbugs</groupId>
           <artifactId>spotbugs-maven-plugin</artifactId>
           <version>${spotbugs-maven-plugin.version}</version>
@@ -461,12 +466,6 @@
           <groupId>com.diffplug.spotless</groupId>
           <artifactId>spotless-maven-plugin</artifactId>
           <version>${spotless-maven-plugin.version}</version>
-        </plugin>
-
-        <plugin>
-          <groupId>eu.maveniverse.maven.plugins</groupId>
-          <artifactId>toolbox</artifactId>
-          <version>${toolbox.version}</version>
         </plugin>
 
       </plugins>
@@ -656,6 +655,13 @@
                We relax that constraint for tests and use class path there. -->
           <useModulePath>false</useModulePath>
         </configuration>
+      </plugin>
+
+      <!-- Use Mimir -->
+      <plugin>
+        <groupId>eu.maveniverse.maven.mimir</groupId>
+        <artifactId>extension</artifactId>
+        <extensions>true</extensions>
       </plugin>
 
       <plugin>
@@ -1011,25 +1017,6 @@
       </build>
     </profile>
 
-    <!-- Installs the Mimir extension -->
-    <profile>
-      <id>mimir-install</id>
-
-      <build>
-        <defaultGoal>toolbox:add-core-extension</defaultGoal>
-
-        <plugins>
-          <plugin>
-            <groupId>eu.maveniverse.maven.plugins</groupId>
-            <artifactId>toolbox</artifactId>
-            <configuration>
-              <gav>eu.maveniverse.maven.mimir:extension:${mimir.version}</gav>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
     <!-- Dummy profile to trigger updates for these dependencies -->
     <profile>
 
@@ -1050,11 +1037,6 @@
           <groupId>com.palantir.javaformat</groupId>
           <artifactId>palantir-java-format</artifactId>
           <version>${palantir-java-format.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>eu.maveniverse.maven.mimir</groupId>
-          <artifactId>extension</artifactId>
-          <version>${mimir.version}</version>
         </dependency>
       </dependencies>
     </profile>
