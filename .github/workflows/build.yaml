@@ -52,7 +52,7 @@ jobs:
           # Compute the key cache
           echo MIMIR_KEY="mimir-cache-$(date +'%Y-%m')" >> $GITHUB_ENV
           # Mimir currently does not support relative paths, so we need to compute the absolute path of `mimir`.
-          echo MAVEN_OPTS="-Dmimir.daemon.passOnBasedir=true -Dmimir.basedir=$GITHUB_WORKSPACE/.mimir" >> $GITHUB_ENV
+          echo MAVEN_OPTS="-Dmimir.daemon.passOnBasedir=true -Dmimir.daemon.autostop=true -Dmimir.basedir=$GITHUB_WORKSPACE/.mimir" >> $GITHUB_ENV
 
       - name: Setup Mimir Cache
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # 4.2.3
@@ -62,7 +62,7 @@ jobs:
           #
           # However, GitHub caches are immutable, and we need a unique key to update them.
           # If no cache hit occurs for this key, we fall back to any other cache.
-          key: "${{ env.MIMIR_KEY }}-${{ hashFiles('**/pom.xml', '!.mimir/**') }}"
+          key: "${{ env.MIMIR_KEY }}-${{ hashFiles('**/pom.xml') }}"
           restore-keys: |
             ${{ env.MIMIR_KEY }}-
           path: .mimir/local
