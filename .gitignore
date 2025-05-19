@@ -10,3 +10,4 @@ target/
 # Maven files
 .flattened-pom.xml
 /.mvn/extensions.xml
+/mimir/

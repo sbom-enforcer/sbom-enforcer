@@ -49,14 +49,18 @@ jobs:
       - name: Setup Mimir
         shell: bash
         run: |
-          cp .github/build-extensions.xml .mvn/extensions.xml
-          cat .mvn/extensions.xml
+          # Compute the key cache
           echo MIMIR_KEY="mimir-cache-$(date +'%Y-%m')" >> $GITHUB_ENV
-          MIMIR_PATH="$HOME/.mimir/local"
+          # Mimir currently does not support relative paths, so we need to compute the absolute path of `mimir`.
+          MIMIR_BASEDIR="`pwd`/mimir"
           case `uname` in
-            MINGW*) MIMIR_PATH=`cygpath -w "$MIMIR_PATH"`;;
+            MINGW*) MIMIR_BASEDIR=`cygpath -w "MIMIR_BASEDIR"`;;
           esac
-          echo MIMIR_PATH="$MIMIR_PATH" >> $GITHUB_ENV
+          echo MAVEN_OPTS="-Dmimir.basedir=$MIMIR_BASEDIR" >> $GITHUB_ENV
+          # Install Mimir
+          ./mvnw \
+            --show-version --batch-mode --no-transfer-progress \
+            -Pmimir-install
 
       - name: Setup Mimir Cache
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # 4.2.3
@@ -64,7 +68,7 @@ jobs:
           # Mimir contains an exact copy of part of Maven Central.
           # Therefore, we only need to clean it from time to time to remove old versions.
           key: ${{ env.MIMIR_KEY }}
-          path: ${{ env.MIMIR_PATH }}
+          path: mimir/local
           enableCrossOsArchive: true
 
       - name: Build
