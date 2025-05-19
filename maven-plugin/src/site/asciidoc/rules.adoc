@@ -197,4 +197,3 @@ The `distribution-intake` external reference is usually protected by authenticat
 * **Type**: `List<String>`
 * **Required**: `No`
 * **Default**: `[distribution-intake]`
-
