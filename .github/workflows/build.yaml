@@ -52,7 +52,7 @@ jobs:
           # Compute the key cache
           echo MIMIR_KEY="mimir-cache-$(date +'%Y-%m')" >> $GITHUB_ENV
           # Mimir currently does not support relative paths, so we need to compute the absolute path of `mimir`.
-          echo MAVEN_OPTS="-Dmimir.daemon.passOnBasedir=true -Dmimir.basedir=$GITHUB_WORKSPACE/mimir" >> $GITHUB_ENV
+          echo MAVEN_OPTS="-Dmimir.daemon.passOnBasedir=true -Dmimir.basedir=$GITHUB_WORKSPACE/.mimir" >> $GITHUB_ENV
 
       - name: Setup Mimir Cache
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # 4.2.3
@@ -60,7 +60,7 @@ jobs:
           # Mimir contains an exact copy of part of Maven Central.
           # Therefore, we only need to clean it from time to time to remove old versions.
           key: ${{ env.MIMIR_KEY }}
-          path: mimir/local
+          path: .mimir/local
           enableCrossOsArchive: true
 
       - name: Build
