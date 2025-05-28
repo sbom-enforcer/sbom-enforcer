@@ -136,7 +136,7 @@
     <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
     <mimir.version>0.7.6</mimir.version>
     <spotbugs-maven-plugin.version>4.9.3.0</spotbugs-maven-plugin.version>
-    <spotless-maven-plugin.version>2.44.4</spotless-maven-plugin.version>
+    <spotless-maven-plugin.version>2.44.5</spotless-maven-plugin.version>
 
     <!-- Dependency versions -->
     <assertj.version>3.27.3</assertj.version>
