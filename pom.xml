@@ -154,7 +154,7 @@
     <maven.version>3.9.10</maven.version>
     <maven-resolver.version>1.9.23</maven-resolver.version>
     <!-- Pinned transitive versions -->
-    <jackson.version>2.19.0</jackson.version>
+    <jackson.version>2.20.0</jackson.version>
 
     <!-- Dummy version will be updated by parse-version mojo -->
     <parsedVersion.majorVersion />
