@@ -114,7 +114,7 @@
     <apache-rat-plugin.version>0.16.1</apache-rat-plugin.version>
     <bnd-baseline-maven-plugin.version>7.1.0</bnd-baseline-maven-plugin.version>
     <build-helper-maven-plugin.version>3.6.1</build-helper-maven-plugin.version>
-    <central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
+    <central-publishing-maven-plugin.version>0.9.0</central-publishing-maven-plugin.version>
     <commons-codec.version>1.18.0</commons-codec.version>
     <cyclonedx-maven-plugin.version>2.9.1</cyclonedx-maven-plugin.version>
     <flatten-maven-plugin.version>1.7.0</flatten-maven-plugin.version>
