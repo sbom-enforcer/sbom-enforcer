@@ -107,7 +107,7 @@
     <!-- Maven plugin dependencies -->
     <error_prone.version>2.38.0</error_prone.version>
     <findsecbugs-plugin.version>1.14.0</findsecbugs-plugin.version>
-    <palantir-java-format.version>2.68.0</palantir-java-format.version>
+    <palantir-java-format.version>2.81.0</palantir-java-format.version>
 
     <!-- Maven plugin versions -->
     <apache-jar-resource-bundle.version>1.5</apache-jar-resource-bundle.version>
