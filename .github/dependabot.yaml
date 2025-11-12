@@ -20,15 +20,19 @@ version: 2
 registries:
   maven-central:
     type: maven-repository
-    url: https://repo.maven.apache.org/maven2
+    url: https://repo.maven.apache.org/maven2/
 
 updates:
 
   - package-ecosystem: maven
     directory: "/"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 1
     schedule:
-      interval: "daily"
+      interval: "quarterly"
+    groups:
+      maven:
+        patterns:
+          - "*"
     target-branch: "main"
     registries:
       - maven-central
@@ -36,5 +40,9 @@ updates:
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "quarterly"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
     target-branch: "main"
