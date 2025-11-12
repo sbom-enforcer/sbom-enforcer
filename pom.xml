@@ -105,56 +105,56 @@
     <maven.site.deploy.skip>true</maven.site.deploy.skip>
 
     <!-- Maven plugin dependencies -->
-    <error_prone.version>2.38.0</error_prone.version>
+    <error_prone.version>2.44.0</error_prone.version>
     <findsecbugs-plugin.version>1.14.0</findsecbugs-plugin.version>
-    <palantir-java-format.version>2.68.0</palantir-java-format.version>
+    <palantir-java-format.version>2.82.0</palantir-java-format.version>
 
     <!-- Maven plugin versions -->
     <apache-jar-resource-bundle.version>1.5</apache-jar-resource-bundle.version>
-    <apache-rat-plugin.version>0.16.1</apache-rat-plugin.version>
+    <apache-rat-plugin.version>0.17</apache-rat-plugin.version>
     <bnd-baseline-maven-plugin.version>7.1.0</bnd-baseline-maven-plugin.version>
     <build-helper-maven-plugin.version>3.6.1</build-helper-maven-plugin.version>
-    <central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
-    <commons-codec.version>1.18.0</commons-codec.version>
+    <central-publishing-maven-plugin.version>0.9.0</central-publishing-maven-plugin.version>
+    <commons-codec.version>1.20.0</commons-codec.version>
     <cyclonedx-maven-plugin.version>2.9.1</cyclonedx-maven-plugin.version>
-    <flatten-maven-plugin.version>1.7.0</flatten-maven-plugin.version>
-    <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
+    <flatten-maven-plugin.version>1.7.3</flatten-maven-plugin.version>
+    <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
     <log4j-changelog-maven-plugin.version>0.9.0</log4j-changelog-maven-plugin.version>
-    <maven-artifact-plugin.version>3.6.0</maven-artifact-plugin.version>
+    <maven-artifact-plugin.version>3.6.1</maven-artifact-plugin.version>
     <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
-    <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
+    <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
     <maven-deploy-plugin.version>3.1.4</maven-deploy-plugin.version>
-    <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
-    <maven-gpg-plugin.version>3.2.7</maven-gpg-plugin.version>
+    <maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
+    <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
     <maven-install-plugin.version>3.1.4</maven-install-plugin.version>
     <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
-    <maven-javadoc-plugin.version>3.11.2</maven-javadoc-plugin.version>
-    <maven-plugin-plugin.version>3.15.1</maven-plugin-plugin.version>
+    <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
+    <maven-plugin-plugin.version>3.15.2</maven-plugin-plugin.version>
     <maven-remote-resources-plugin.version>3.3.0</maven-remote-resources-plugin.version>
     <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
     <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
-    <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
+    <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
     <mimir.version>0.7.9</mimir.version>
-    <spotbugs-maven-plugin.version>4.9.3.0</spotbugs-maven-plugin.version>
-    <spotless-maven-plugin.version>2.44.5</spotless-maven-plugin.version>
+    <spotbugs-maven-plugin.version>4.9.8.1</spotbugs-maven-plugin.version>
+    <spotless-maven-plugin.version>3.0.0</spotless-maven-plugin.version>
 
     <!-- Dependency versions -->
-    <assertj.version>3.27.3</assertj.version>
+    <assertj.version>3.27.6</assertj.version>
     <junit.version>5.11.4</junit.version>
-    <maven-plugin-annotations.version>3.15.1</maven-plugin-annotations.version>
+    <maven-plugin-annotations.version>3.15.2</maven-plugin-annotations.version>
     <osgi-annotation-bundle.version>2.0.0</osgi-annotation-bundle.version>
     <osgi-annotation-versioning.version>1.1.2</osgi-annotation-versioning.version>
     <slf4j.version>2.0.17</slf4j.version>
-    <spotbugs-annotations.version>4.9.3</spotbugs-annotations.version>
+    <spotbugs-annotations.version>4.9.8</spotbugs-annotations.version>
     <!--
       ~ Dependencies provided by Maven.
       ~
       ~ Baseline: Maven 3.9.x
       -->
-    <maven.version>3.9.10</maven.version>
-    <maven-resolver.version>1.9.23</maven-resolver.version>
+    <maven.version>3.9.11</maven.version>
+    <maven-resolver.version>1.9.24</maven-resolver.version>
     <!-- Pinned transitive versions -->
-    <jackson.version>2.19.0</jackson.version>
+    <jackson.version>2.20.1</jackson.version>
 
     <!-- Dummy version will be updated by parse-version mojo -->
     <parsedVersion.majorVersion />
@@ -289,7 +289,7 @@
       <dependency>
         <groupId>org.junit</groupId>
         <artifactId>junit-bom</artifactId>
-        <version>5.13.1</version>
+        <version>6.0.1</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -297,7 +297,7 @@
       <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-bom</artifactId>
-        <version>5.18.0</version>
+        <version>5.20.0</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -585,7 +585,7 @@
           <dependency>
             <groupId>de.skuzzle.enforcer</groupId>
             <artifactId>restrict-imports-enforcer-rule</artifactId>
-            <version>2.6.1</version>
+            <version>3.0.0</version>
           </dependency>
         </dependencies>
         <executions>
